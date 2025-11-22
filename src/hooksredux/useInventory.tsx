@@ -42,7 +42,8 @@ export const useInventory = () => {
     dispatch(updateQuantity({ id, quantity }));
   };
 
-  // Efecto para actualizar estado de expiración CADA DÍA
+  // Efecto para actualizar estado de expiración cada día
+
   useEffect(() => {
     const interval = setInterval(() => {
       updateExpiringProducts();

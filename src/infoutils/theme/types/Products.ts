@@ -20,8 +20,8 @@ export interface InventoryItemSerializable {
 // Tipo para uso en componentes (fechas como Date)
 export interface InventoryItem {
   product: Product;
-  addedDate: Date;  // ← fecha para que cuente cada hora del día
-  expirationDate: Date;  // ← fecha para que cuente cada hora del día
+  addedDate: Date;  // fecha para que cuente cada hora del día
+  expirationDate: Date;  // fecha para que cuente cada hora del día
   isExpiring: boolean;
   quantity: number;
 }

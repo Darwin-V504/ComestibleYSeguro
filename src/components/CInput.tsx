@@ -1,88 +1,124 @@
-import { Button,KeyboardTypeOptions,StyleSheet,Text, TextInput, Touchable, TouchableOpacity, View } from "react-native";
-import {MaterialIcons, Ionicons} from "@expo/vector-icons";
+import { KeyboardTypeOptions, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { MaterialIcons, Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
 
 type Props = {
-    required? : boolean;
+    required?: boolean;
     type?: 'text' | 'email' | 'password' | 'number';
     value: string;
-    placeholder : string;
-    onChangeText: (text: string) => void;
-}
+    placeholder: string;
+    onChangeText?: (text: string) => void;
+    editable?: boolean;
+    icon?: React.ReactNode;
+};
 
-export default function CInput ({type = "text", required, value, placeholder, onChangeText}: Props){
+export default function CInput({
+    type = "text",
+    required,
+    value,
+    placeholder,
+    onChangeText,
+    editable = true,       
+    icon,              
+}: Props) {
+
     const [isSecureText, setIsSecureText] = useState(type === "password");
-    const isPasswordField = type === 'password';
-   
-    const icon = type === 'email' ? 'email' : 
-                    type === 'password' ? 'lock' : ''
+    const isPasswordField = type === "password";
 
-    const keyboardType: KeyboardTypeOptions = 
-        type==='email'? 'email-address' : 
-        type === 'number' ? 'numeric' :
-        'default';
+    // icono por defecto solo si NO mandas uno manual
+    const defaultIcon = type === "email" ? "email" :
+                        type === "password" ? "lock" :
+                        null;
 
-        //funcion para calcular errores de validacion
-        //output: string
+    const keyboardType: KeyboardTypeOptions =
+        type === "email" ? "email-address" :
+            type === "number" ? "numeric" :
+                "default";
+
     const getError = () => {
-        if (type === 'email' && !value.includes('@')) return 'Correo invalido';
-        if (type === 'password' && value.length < 6) return 'La contraseña debe tener al menos 6 caracteres';
-        // validar campos obligatorios
-    }
-    const error = getError();    
-    return(
-        //wrapper
+        if (type === "email" && !value.includes("@")) return "Correo inválido";
+        if (type === "password" && value.length < 6) return "La contraseña debe tener al menos 6 caracteres";
+        return "";
+    };
+
+    const error = getError();
+
+    return (
         <View style={styles.wrapper}>
-            {/* //inputContainer */}
+
+            {/* INPUT */}
             <View style={[styles.inputContainer, error && styles.inputError]}>
-                <MaterialIcons name={icon as any } size={20} color="#000000" />
-                <TextInput 
-                 placeholder={placeholder}
-                 value={value} 
-                 onChangeText={onChangeText}
-                 onBlur={()=>{}}
-                 secureTextEntry={isSecureText}
-                 style={styles.input}
-                 />
-                
-              { isPasswordField && <TouchableOpacity 
-                    onPress={
-                        ()=>{
-                            setIsSecureText(!isSecureText);
-                        }
-                    }
-                > 
-                    <Ionicons name={isSecureText ? 'eye' : 'eye-off'} size={22} />
-                </TouchableOpacity>}
+
+                {/* ICONO IZQUIERDO */}
+                {icon ? (
+                    <View style={{ marginRight: 10 }}>
+                        {icon}
+                    </View>
+                ) : (
+                    defaultIcon && (
+                        <MaterialIcons
+                            name={defaultIcon as any}
+                            size={20}
+                            color="#000000"
+                            style={{ marginRight: 10 }}
+                        />
+                    )
+                )}
+
+                <TextInput
+                    placeholder={placeholder}
+                    value={value}
+                    onChangeText={onChangeText}
+                    secureTextEntry={isSecureText}
+                    editable={editable}                 // 👈 AHORA FUNCIONA
+                    keyboardType={keyboardType}
+                    style={styles.input}
+                />
+
+                {/* BOTÓN OJO SOLO SI ES PASSWORD */}
+                {isPasswordField && (
+                    <TouchableOpacity
+                        onPress={() => setIsSecureText(!isSecureText)}
+                    >
+                        <Ionicons
+                            name={isSecureText ? "eye" : "eye-off"}
+                            size={22}
+                        />
+                    </TouchableOpacity>
+                )}
             </View>
-            { error && <Text style={styles.inputError}> {error} </Text>}
+
+            {/* ERROR */}
+            {error ? <Text style={styles.errorText}>{error}</Text> : null}
         </View>
     );
 }
 
 const styles = StyleSheet.create({
-   wrapper:{
+    wrapper: {
         marginBottom: 10,
-   },
-    inputContainer: {
-        //distribucion de componentes
-        flexDirection: 'row',
-        alignItems: 'center',
-        //estilizacion de input
-        borderWidth: 1,
-        borderColor:'#ccc',
-        borderRadius: 8, 
-        paddingHorizontal: 13,
-        backgroundColor: '#f9f9f9',
     },
-    input:{
-        //agregando espacio al componente input nativo
+    inputContainer: {
+        flexDirection: "row",
+        alignItems: "center",
+        borderWidth: 1,
+        borderColor: "#ccc",
+        borderRadius: 8,
+        paddingHorizontal: 13,
+        backgroundColor: "#f9f9f9",
+    },
+    input: {
         paddingVertical: 10,
         paddingHorizontal: 15,
-        width: '80%',
+        flex: 1, // 👈 mejora para que no rompa el layout
     },
     inputError: {
-        borderColor: 'red',
-        color: 'red'
-    }
-})
+        borderColor: "red",
+    },
+    errorText: {
+        color: "red",
+        fontSize: 12,
+        marginTop: 3,
+        marginLeft: 5,
+    },
+});

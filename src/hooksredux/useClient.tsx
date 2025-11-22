@@ -1,6 +1,6 @@
-
+// hooksredux/useClient.tsx
 import { useAppDispatch, useAppSelector } from "../store/hooks";
-import { setClientProfile, updateClientProfile, clearClientProfile } from "../store/ClientSlice";
+import { setClientProfile, updateClientProfile, updateProfileImage, clearClientProfile } from "../store/ClientSlice";
 
 export const useClient = () => {
   const dispatch = useAppDispatch();
@@ -13,9 +13,10 @@ export const useClient = () => {
       email: clientData.email,
       phone: clientData.phone,
       birthDate: clientData.birthDate,
-      favoriteService: "Gestión de Despensa", // Valor por defecto
+      favoriteService: "Gestión de Despensa",
       notes: "Cliente de Comestible y Seguro",
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
+      profileImage: null 
     };
     
     dispatch(setClientProfile(clientProfile));
@@ -23,6 +24,11 @@ export const useClient = () => {
 
   const updateProfile = (updates: any) => {
     dispatch(updateClientProfile(updates));
+  };
+
+  // actualizar imagen
+  const updateProfilePicture = (imageUri: string) => {
+    dispatch(updateProfileImage(imageUri));
   };
 
   const clearProfile = () => {
@@ -33,6 +39,7 @@ export const useClient = () => {
     client,
     saveClientProfile,
     updateProfile,
+    updateProfilePicture, 
     clearProfile
   };
 };

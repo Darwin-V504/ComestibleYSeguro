@@ -129,6 +129,32 @@ export const translations = {
     logout: 'Logout',
     reducingWaste: 'Reducing food waste, one product at a time',
     version: 'Version Beta',
+
+    // Profile Photo - New translations
+    changeProfilePhoto: 'Change Profile Photo',
+    selectOption: 'Select an option',
+    takePhoto: 'Take Photo',
+    chooseFromGallery: 'Choose from Gallery',
+    cancel: 'Cancel',
+    photoUpdateSuccess: 'Profile photo updated successfully!',
+    photoUpdateError: 'Could not update profile photo',
+    cameraPermissionDenied: 'Camera permission denied',
+    galleryPermissionDenied: 'Gallery permission denied',
+    needCameraAccess: 'You need to allow camera access to take a photo',
+    needGalleryAccess: 'You need to allow gallery access to choose a photo',
+    cameraError: 'Error taking photo',
+    galleryError: 'Error selecting photo from gallery',
+    
+    // Permission messages
+    permissionRequired: 'Permission Required',
+    allowAccessTo: 'Allow access to',
+    toContinue: 'to continue',
+    openSettings: 'Open Settings',
+    
+    // Photo options
+    photoOptions: 'Photo Options',
+    selectPhotoSource: 'Select photo source',
+
     
     // Language
     language: 'Language',
@@ -283,6 +309,31 @@ export const translations = {
     logout: 'Cerrar Sesión',
     reducingWaste: 'Reduciendo el desperdicio de alimentos, un producto a la vez',
     version: 'Version Beta',
+
+    // Profile Photo - New translations
+    changeProfilePhoto: 'Cambiar Foto de Perfil',
+    selectOption: 'Selecciona una opción',
+    takePhoto: 'Tomar Foto',
+    chooseFromGallery: 'Elegir de Galería',
+    cancel: 'Cancelar',
+    photoUpdateSuccess: '¡Foto de perfil actualizada correctamente!',
+    photoUpdateError: 'No se pudo actualizar la foto de perfil',
+    cameraPermissionDenied: 'Permiso de cámara denegado',
+    galleryPermissionDenied: 'Permiso de galería denegado',
+    needCameraAccess: 'Necesitas permitir el acceso a la cámara para tomar una foto',
+    needGalleryAccess: 'Necesitas permitir el acceso a la galería para elegir una foto',
+    cameraError: 'Error al tomar la foto',
+    galleryError: 'Error al seleccionar foto de la galería',
+    
+    // Permission messages
+    permissionRequired: 'Permiso Requerido',
+    allowAccessTo: 'Permitir acceso a',
+    toContinue: 'para continuar',
+    openSettings: 'Abrir Configuración',
+    
+    // Photo options
+    photoOptions: 'Opciones de Foto',
+    selectPhotoSource: 'Selecciona fuente de foto',
     
     // Language
     language: 'Idioma',

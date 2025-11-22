@@ -1,4 +1,4 @@
-
+// store/ClientSlice.ts
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 export interface ClientProfile {
@@ -10,6 +10,7 @@ export interface ClientProfile {
     favoriteService: string;
     notes: string;
     createdAt: string;
+    profileImage: string | null; 
 }
 
 const initialState: ClientProfile = {
@@ -20,7 +21,8 @@ const initialState: ClientProfile = {
     birthDate: "",
     favoriteService: "",
     notes: "",
-    createdAt: ""
+    createdAt: "",
+    profileImage: null 
 };
 
 const clientSlice = createSlice({
@@ -36,13 +38,18 @@ const clientSlice = createSlice({
             state.favoriteService = action.payload.favoriteService;
             state.notes = action.payload.notes;
             state.createdAt = action.payload.createdAt;
+            state.profileImage = action.payload.profileImage; // 👈 NUEVO
         },
         updateClientProfile: (state, action: PayloadAction<Partial<ClientProfile>>) => {
             return { ...state, ...action.payload };
+        },
+     
+        updateProfileImage: (state, action: PayloadAction<string>) => {
+            state.profileImage = action.payload;
         },
         clearClientProfile: () => initialState,
     }
 });
 
-export const { setClientProfile, updateClientProfile, clearClientProfile } = clientSlice.actions;
+export const { setClientProfile, updateClientProfile, updateProfileImage, clearClientProfile } = clientSlice.actions;
 export default clientSlice.reducer;

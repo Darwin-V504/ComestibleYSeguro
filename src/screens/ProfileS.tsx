@@ -1,4 +1,5 @@
-import { View, Text, StyleSheet, ScrollView, Switch, TouchableOpacity } from 'react-native';
+// screens/ProfileS.tsx
+import { View, Text, StyleSheet, ScrollView, Switch, TouchableOpacity, Alert, Image } from 'react-native';
 import CButton from '../components/CButton';
 import { useAuth } from '../contexts/AuthContexts';
 import { useInventory } from '../hooksredux/useInventory';
@@ -6,14 +7,21 @@ import { useTheme } from '../contexts/ThemeContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { getThemeColors } from '../infoutils/theme';
 import { Ionicons } from '@expo/vector-icons';
+import { useClient } from '../hooksredux/useClient';
+import { Linking } from 'react-native';
+import * as ImagePicker from 'expo-image-picker'; 
+import { useState, useEffect } from 'react';
 
 export default function ProfileScreen({ navigation }: any) {
     const { logout, user, isAllowed } = useAuth();
     const { inventory } = useInventory();
     const { theme, toggleTheme } = useTheme();
     const { language, changeLanguage, t } = useLanguage();
+    const { client, updateProfilePicture } = useClient(); 
     const colors = getThemeColors(theme);
     const styles = getStyles(colors);
+
+    const [hasGalleryPermission, setHasGalleryPermission] = useState<boolean | null>(null);
 
     const expiringProducts = inventory.filter(item => {
         const today = new Date();
@@ -25,6 +33,105 @@ export default function ProfileScreen({ navigation }: any) {
 
     const totalProducts = inventory.length;
 
+    // solicitar permisos de galeria
+    useEffect(() => {
+        (async () => {
+            const galleryStatus = await ImagePicker.requestMediaLibraryPermissionsAsync();
+            setHasGalleryPermission(galleryStatus.status === 'granted');
+        })();
+    }, []);
+
+    // seleccionar imagen
+    const pickImage = async () => {
+        if (hasGalleryPermission === false) {
+            Alert.alert(
+                t('permissionRequired'),
+                t('needGalleryAccess'),
+                [
+                    { text: t('cancel'), style: "cancel" },
+                    { text: t('openSettings'), onPress: () => Linking.openSettings() }
+                ]
+            );
+            return;
+        }
+
+        try {
+            let result = await ImagePicker.launchImageLibraryAsync({
+                mediaTypes: ImagePicker.MediaTypeOptions.Images,
+                allowsEditing: true,
+                aspect: [1, 1],
+                quality: 0.8,
+            });
+
+            if (!result.canceled && result.assets && result.assets.length > 0) {
+                const selectedImage = result.assets[0];
+                updateProfilePicture(selectedImage.uri);
+                
+                Alert.alert(t('success'), t('photoUpdateSuccess'));
+            }
+        } catch (error) {
+            console.error("Error seleccionando imagen:", error);
+            Alert.alert(t('error'), t('galleryError'));
+        }
+    };
+
+    // tomar foto con traducciones
+    const takePhoto = async () => {
+        const cameraStatus = await ImagePicker.requestCameraPermissionsAsync();
+        
+        if (cameraStatus.status !== 'granted') {
+            Alert.alert(
+                t('permissionRequired'),
+                t('needCameraAccess'),
+                [
+                    { text: t('cancel'), style: "cancel" },
+                    { text: t('openSettings'), onPress: () => Linking.openSettings() }
+                ]
+            );
+            return;
+        }
+
+        try {
+            let result = await ImagePicker.launchCameraAsync({
+                allowsEditing: true,
+                aspect: [1, 1],
+                quality: 0.8,
+            });
+
+            if (!result.canceled && result.assets && result.assets.length > 0) {
+                const takenPhoto = result.assets[0];
+                updateProfilePicture(takenPhoto.uri);
+                
+                Alert.alert(t('success'), t('photoUpdateSuccess'));
+            }
+        } catch (error) {
+            console.error("Error tomando foto:", error);
+            Alert.alert(t('error'), t('cameraError'));
+        }
+    };
+
+    // Cambiar foto con traducciones
+    const showImageOptions = () => {
+        Alert.alert(
+            t('changeProfilePhoto'),
+            t('selectPhotoSource'),
+            [
+                {
+                    text: t('takePhoto'),
+                    onPress: takePhoto
+                },
+                {
+                    text: t('chooseFromGallery'),
+                    onPress: pickImage
+                },
+                {
+                    text: t('cancel'),
+                    style: "cancel"
+                }
+            ]
+        );
+    };
+
     const handleLogout = () => {    
         logout();
         navigation.reset({
@@ -35,20 +142,37 @@ export default function ProfileScreen({ navigation }: any) {
 
     return (
         <ScrollView style={styles.container}>
-            {/* Header */}
+           
             <View style={styles.header}>
-                <View style={styles.avatar}>
-                    <Ionicons name="person" size={40} color={colors.white} />
-                </View>
+                {/* Icono de foto */}
+                <TouchableOpacity onPress={showImageOptions} style={styles.avatarContainer}>
+                    {client.profileImage ? (
+                        <Image 
+                            source={{ uri: client.profileImage }} 
+                            style={styles.avatarImage}
+                        />
+                    ) : (
+                        <View style={styles.avatar}>
+                            <Ionicons name="person" size={40} color={colors.white} />
+                        </View>
+                    )}
+                    {/* Editar foto de perfil */}
+                    <View style={styles.editBadge}>
+                        <Ionicons name="camera" size={16} color={colors.white} />
+                    </View>
+                </TouchableOpacity>
+
                 <Text style={styles.userEmail}>
-                    {user?.email || t('welcome')}
+                    {client.name || user?.email || t('welcome')}
                 </Text>
                 <Text style={styles.userStatus}>
                     {isAllowed ? t('connected') : t('disconnected')}
                 </Text>
             </View>
 
-            {/* Estadísticas */}
+            
+
+            {/* estadisticas */}
             <View style={styles.statsSection}>
                 <Text style={styles.sectionTitle}>{t('yourStats')}</Text>
                 <View style={styles.statsGrid}>
@@ -65,7 +189,7 @@ export default function ProfileScreen({ navigation }: any) {
                 </View>
             </View>
 
-            {/* Configuración de Idioma */}
+            {/* Config de idioma */}
             <View style={styles.settingsSection}>
                 <Text style={styles.sectionTitle}>{t('language')}</Text>
                 <View style={styles.languageSetting}>
@@ -111,7 +235,7 @@ export default function ProfileScreen({ navigation }: any) {
                 </View>
             </View>
 
-            {/* Configuración de Tema */}
+            {/* config de tema */}
             <View style={styles.settingsSection}>
                 <Text style={styles.sectionTitle}>{t('appearance')}</Text>
                 <View style={styles.themeSetting}>
@@ -135,7 +259,7 @@ export default function ProfileScreen({ navigation }: any) {
                 </View>
             </View>
 
-            {/* Acciones */}
+            {/* actions */}
             <View style={styles.actionsSection}>
                 <Text style={styles.sectionTitle}>{t('actions')}</Text>
                 <CButton
@@ -155,7 +279,7 @@ export default function ProfileScreen({ navigation }: any) {
                 />
             </View>
 
-            {/* Cerrar Sesión */}
+            {/* logout */}
             <View style={styles.settingsSection}>
                 <Text style={styles.sectionTitle}>{t('session')}</Text>
                 <CButton
@@ -165,28 +289,31 @@ export default function ProfileScreen({ navigation }: any) {
                 />
             </View>
 
-            {/* Información de la App */}
+            {/* info app */}
             <View style={styles.infoSection}>
                 <Text style={styles.appName}>Comestible y Seguro</Text>
                 <Text style={styles.appDescription}>
                     {t('reducingWaste')}
                 </Text>
-                <Text style={styles.appVersion}>{t('version')} 1.0.0</Text>
-               
+                <Text style={styles.appVersion}>{t('version')} 1.2</Text>
             </View>
         </ScrollView>
     );
 }
 
 const getStyles = (colors: any) => StyleSheet.create({
- container: {
-     flex: 1,
-     backgroundColor: colors.background,
+    container: {
+        flex: 1,
+        backgroundColor: colors.background,
     },
     header: {
         alignItems: 'center',
         padding: 20,
         backgroundColor: colors.primary,
+    },
+    avatarContainer: {
+        position: 'relative',
+        marginBottom: 12,
     },
     avatar: {
         width: 80,
@@ -195,13 +322,33 @@ const getStyles = (colors: any) => StyleSheet.create({
         backgroundColor: colors.primarySoft,
         justifyContent: 'center',
         alignItems: 'center',
-        marginBottom: 12,
+    },
+    avatarImage: {
+        width: 80,
+        height: 80,
+        borderRadius: 40,
+        borderWidth: 3,
+        borderColor: colors.white,
+    },
+    editBadge: {
+        position: 'absolute',
+        bottom: 0,
+        right: 0,
+        backgroundColor: colors.primary,
+        width: 28,
+        height: 28,
+        borderRadius: 14,
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderWidth: 2,
+        borderColor: colors.white,
     },
     userEmail: {
         fontSize: 18,
         fontWeight: 'bold',
         color: colors.white,
         marginBottom: 4,
+        textAlign: 'center',
     },
     userStatus: {
         fontSize: 14,
@@ -360,5 +507,4 @@ const getStyles = (colors: any) => StyleSheet.create({
         color: colors.textSecondary,
         marginBottom: 8,
     },
-   
 });

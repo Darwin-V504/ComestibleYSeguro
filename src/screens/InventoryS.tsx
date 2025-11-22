@@ -2,14 +2,14 @@ import { View, Text, StyleSheet, FlatList, Alert } from 'react-native';
 import { useState } from 'react';
 import CButton from '../components/CButton';
 import ProductCard from '../components/ProductCard';
-import { useInventory } from '../hooksredux/useInventory'; // ← Usar el hook
+import { useInventory } from '../hooksredux/useInventory'; 
 import { useTheme } from '../contexts/ThemeContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { getThemeColors } from '../infoutils/theme';
 import { Ionicons } from '@expo/vector-icons';
 
 export default function InventoryScreen({ navigation }: any) {
-  const { inventory, removeProduct, updateQuantity } = useInventory(); // ← Dates convertidos
+  const { inventory, removeProduct, updateQuantity } = useInventory(); 
   const [filter, setFilter] = useState<'all' | 'expiring'>('all');
   const { theme } = useTheme();
   const { t } = useLanguage();

@@ -12,13 +12,13 @@ type MenuItem = {
   screen: string;
   requiresAuth: boolean;
   Exit: boolean;
-  onPress?: () => void; // 👈 AÑADIR ESTA PROPIEDAD OPCIONAL
+  onPress?: () => void; 
 };
 
 export default function IndexS({navigation }: any) {
 //crear estado para controlar si el menu esta abierto o cerrado
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { user, isAllowed, logout } = useAuth(); // 👈 MOVER logout AQUÍ
+  const { user, isAllowed, logout } = useAuth();
   const { theme } = useTheme();
   const colors = getThemeColors(theme);
   const styles = getStyles(colors);

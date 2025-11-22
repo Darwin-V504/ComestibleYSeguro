@@ -25,7 +25,7 @@ export default function TabsNavigator() {
         tomorrow.setDate(tomorrow.getDate() + 2);
         const expiring = inventory.filter(item => {
             const expDate = new Date(item.expirationDate);
-            // ignore invalid/ unparsable dates
+        
             if (isNaN(expDate.getTime())) return false;
             return expDate <= tomorrow;
         });

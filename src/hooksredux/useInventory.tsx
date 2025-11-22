@@ -46,7 +46,7 @@ export const useInventory = () => {
   useEffect(() => {
     const interval = setInterval(() => {
       updateExpiringProducts();
-    }, 24 * 60 * 60 * 1000); // 👈 CADA 24 HORAS (no cada hora)
+    }, 24 * 60 * 60 * 1000); 
 
     // Ejecutar inmediatamente al cargar
     updateExpiringProducts();
@@ -76,6 +76,6 @@ export const useInventory = () => {
     removeProduct: removeProductFromInventory,
     updateQuantity: updateProductQuantity,
     getExpiringProducts,
-    updateExpiringProducts // 👈 EXPORTAR para uso manual
+    updateExpiringProducts 
   };
 };

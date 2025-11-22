@@ -1,16 +1,16 @@
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { useEffect, useState } from 'react';
 import CButton from '../components/CButton';
-import { useInventory } from '../hooksredux/useInventory'; // ← Asegurar este import
+import { useInventory } from '../hooksredux/useInventory'; 
 import { useAuth } from '../contexts/AuthContexts';
 import { useTheme } from '../contexts/ThemeContext';
 import { getThemeColors } from '../infoutils/theme';
-import { InventoryItem } from '../infoutils/theme/types/Products'; // ← Este tipo tiene Dates
+import { InventoryItem } from '../infoutils/theme/types/Products'; 
 import { useLanguage } from '../contexts/LanguageContext';
 import { Ionicons } from '@expo/vector-icons';
 
 export default function HomeScreen({ navigation, route }: any) {
-  const { inventory } = useInventory(); // ← Esto ya devuelve Dates
+  const { inventory } = useInventory(); 
   const { user } = useAuth();
   const { theme } = useTheme();
   const colors = getThemeColors(theme);

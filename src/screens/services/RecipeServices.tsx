@@ -16,6 +16,7 @@ import { getThemeColors } from '../../infoutils/theme';
 import { Ionicons } from '@expo/vector-icons';
 
 // recetas prueba
+// aqui debe de ir la Api
 const Recipes = [
   {
     id: '1',

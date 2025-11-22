@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { Product, InventoryItemSerializable } from "../infoutils/theme/types/Products";
+import { Product, InventoryItemSerializable } from "../infoutils/types/Products";
 
 interface InventoryState {
   items: InventoryItemSerializable[];

@@ -3,7 +3,7 @@ import { useState } from 'react';
 import CInput from '../../components/CInput';
 import CButton from '../../components/CButton';
 import { useInventory } from '../../hooksredux/useInventory';
-import { Product, ProductCategory } from '../../infoutils/theme/types/Products';
+import { Product, ProductCategory } from '../../infoutils/types/Products';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { getThemeColors } from '../../infoutils/theme';

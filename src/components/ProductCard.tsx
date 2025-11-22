@@ -1,5 +1,5 @@
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
-import { InventoryItem } from "../infoutils/theme/types/Products";
+import { InventoryItem } from "../infoutils/types/Products";
 import { Ionicons } from "@expo/vector-icons";
 import CButton from "./CButton";
 import { useTheme } from "../contexts/ThemeContext";

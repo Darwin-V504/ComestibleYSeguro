@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
-import CButton from "../components/CButton";
 import { useAuth } from "../contexts/AuthContexts";
 import { Ionicons } from "@expo/vector-icons"; 
 import { useTheme } from "../contexts/ThemeContext";

@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, Alert } from "react-native";
 import CInput from "../components/CInput";
 import CButton from "../components/CButton";
 import { useState } from "react";
@@ -7,6 +7,8 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { useLanguage } from "../contexts/LanguageContext";
 import { useTheme } from "../contexts/ThemeContext";
 import { getThemeColors } from "../infoutils/theme";
+import { useClient } from "../hooksredux/useClient"; 
+import { useAuth } from "../contexts/AuthContexts"; 
 
 export default function RegisterScreen({ navigation }: any) {
     const [fullName, setFullName] = useState('');
@@ -24,11 +26,50 @@ export default function RegisterScreen({ navigation }: any) {
     const colors = getThemeColors(theme);
     const styles = getStyles(colors);
 
+    // hooks
+    const { saveClientProfile } = useClient();
+    const { login } = useAuth();
+
     const handleRegisterToTabs = () => {
         try {
-            navigation.navigate('Index', { email });
+            // validar campos
+            if (!fullName.trim() || !email.trim() || !password.trim()) {
+                Alert.alert("Error", "Por favor completa todos los campos obligatorios");
+                return;
+            }
+
+            if (password !== confirmPassword) {
+                Alert.alert("Error", "Las contraseñas no coinciden");
+                return;
+            }
+
+            // guardar en redux ClientSlice
+            saveClientProfile({
+                fullName,
+                email,
+                phone,
+                birthDate
+            });
+
+            // Auth de usuario
+            const authSuccess = login(email, password);
+            
+            if (authSuccess) {
+                // Redireccion a home con los datos usando redux
+                navigation.replace('Tabs', { 
+                    screen: 'Home',
+                    params: { 
+                        userEmail: email,
+                        userName: fullName 
+                    }
+                });
+            } else {
+                Alert.alert("Error", "No se pudo completar el registro");
+            }
+            
         } catch (error) {
             console.log(error);
+            Alert.alert("Error", "Ocurrió un error durante el registro");
         }
     };
 
@@ -91,7 +132,7 @@ export default function RegisterScreen({ navigation }: any) {
                     icon={<Ionicons name="call-outline" size={22} color={colors.text} />}
                 />
 
-                {/* FECHA DE NACIMIENTO */}
+                {/* Fecha de nacimiento */}
                 <TouchableOpacity onPress={openDatePicker}>
                     <CInput
                         value={birthDate}
@@ -111,7 +152,11 @@ export default function RegisterScreen({ navigation }: any) {
                     />
                 )}
 
-                <CButton title={'Registrarme'} onPress={handleRegisterToTabs} />
+                <CButton 
+                    title={'Registrarme'} 
+                    onPress={handleRegisterToTabs} 
+                    disabled={!fullName || !email || !password || !confirmPassword}
+                />
             </View>
         </View>
     );

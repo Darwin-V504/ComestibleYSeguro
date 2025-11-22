@@ -1,6 +1,6 @@
 import { useAppDispatch, useAppSelector } from "../store/hooks";
 import { addProduct, removeProduct, updateQuantity, updateExpiringStatus,  } from "../store/InventorySlice";
-import { Product } from "../infoutils/theme/types/Products";
+import { Product } from "../infoutils/types/Products";
 import { useCallback, useEffect } from 'react';
 import { AppState } from 'react-native'; 
 

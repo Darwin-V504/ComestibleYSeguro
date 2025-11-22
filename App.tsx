@@ -1,20 +1,31 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import { NavigationContainer } from '@react-navigation/native';
+import { Provider } from 'react-redux';
+import StackNavigator from './src/navigation/StackNavigator';
+import { ThemeProvider, useTheme } from './src/contexts/ThemeContext';
+import { LanguageProvider } from './src/contexts/LanguageContext';
+import { AuthProvider } from './src/contexts/AuthContexts';
+import { store } from './src/store';
+
+// Componente para el StatusBar dinámico
+function ThemedStatusBar() {
+  const { theme } = useTheme();
+  return <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />;
+}
 
 export default function App() {
   return (
-    <View style={styles.container}>
-      <Text>Open up App.tsx to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
+    <Provider store={store}>
+      <LanguageProvider>
+        <ThemeProvider>
+          <ThemedStatusBar />
+          <NavigationContainer>
+            <AuthProvider>
+              <StackNavigator />
+            </AuthProvider>
+          </NavigationContainer>
+        </ThemeProvider>
+      </LanguageProvider>
+    </Provider>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});

@@ -6,7 +6,7 @@ import { ThemeProvider, useTheme } from './src/contexts/ThemeContext';
 import { LanguageProvider } from './src/contexts/LanguageContext';
 import { AuthProvider } from './src/contexts/AuthContexts';
 import { store } from './src/store';
-
+// Cambiando rama default de main a master, hacer commit push para verificar si todo está correcto
 // Componente para el StatusBar dinámico
 function ThemedStatusBar() {
   const { theme } = useTheme();

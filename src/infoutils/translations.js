@@ -1,4 +1,4 @@
-// infoutils/translations.js
+
 export const translations = {
   en: {
     // Auth

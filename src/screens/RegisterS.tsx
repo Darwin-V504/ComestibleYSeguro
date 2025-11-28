@@ -7,8 +7,8 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { useLanguage } from "../contexts/LanguageContext";
 import { useTheme } from "../contexts/ThemeContext";
 import { getThemeColors } from "../infoutils/theme";
-import { useClient } from "../hooksredux/useClient"; 
-import { useAuth } from "../contexts/AuthContexts"; 
+import { useClient } from "../hooksredux/useClient";
+import { useAuth } from "../contexts/AuthContexts";
 
 export default function RegisterScreen({ navigation }: any) {
     const [fullName, setFullName] = useState('');
@@ -16,21 +16,19 @@ export default function RegisterScreen({ navigation }: any) {
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const { t } = useLanguage();
-
     const [phone, setPhone] = useState('');
     const [birthDate, setBirthDate] = useState('');
     const [showDatePicker, setShowDatePicker] = useState(false);
     const [selectedDate, setSelectedDate] = useState(new Date());
-
     const { theme } = useTheme();
     const colors = getThemeColors(theme);
     const styles = getStyles(colors);
 
-    // hooks
+    // hooks 
     const { saveClientProfile } = useClient();
-    const { login } = useAuth();
+    const { signUp } = useAuth(); // USAR signUp
 
-    const handleRegisterToTabs = () => {
+    const handleRegisterToTabs = async () => {
         try {
             // validar campos
             if (!fullName.trim() || !email.trim() || !password.trim()) {
@@ -43,26 +41,29 @@ export default function RegisterScreen({ navigation }: any) {
                 return;
             }
 
-            // guardar en redux ClientSlice
-            saveClientProfile({
-                fullName,
-                email,
-                phone,
-                birthDate
-            });
-
-            // Auth de usuario
-            const authSuccess = login(email, password);
+            
+            const authSuccess = await signUp(email, password); // usar signUp
             
             if (authSuccess) {
-                // Redireccion a home con los datos usando redux
-                navigation.replace('Tabs', { 
-                    screen: 'Home',
-                    params: { 
-                        userEmail: email,
-                        userName: fullName 
-                    }
+                //   guardar en Redux solo si el registro fue exitoso
+                saveClientProfile({
+                    fullName,
+                    email,
+                    phone,
+                    birthDate
                 });
+
+                // Redireccion a Login para que inicien sesión
+                Alert.alert(
+                    "Registro Exitoso", 
+                    "Tu cuenta ha sido creada. Ahora inicia sesión con tus credenciales.",
+                    [
+                        { 
+                            text: "Iniciar Sesión", 
+                            onPress: () => navigation.navigate('Login') 
+                        }
+                    ]
+                );
             } else {
                 Alert.alert("Error", "No se pudo completar el registro");
             }
@@ -147,14 +148,14 @@ export default function RegisterScreen({ navigation }: any) {
                     <DateTimePicker
                         mode="date"
                         value={selectedDate}
-                        maximumDate={new Date()} // para que no elijan futuro
+                        maximumDate={new Date()}
                         onChange={onDateChange}
                     />
                 )}
 
                 <CButton 
                     title={'Registrarme'} 
-                    onPress={handleRegisterToTabs} 
+                    onPress={handleRegisterToTabs}
                     disabled={!fullName || !email || !password || !confirmPassword}
                 />
             </View>

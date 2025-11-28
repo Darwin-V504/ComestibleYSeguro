@@ -1,4 +1,4 @@
-// screens/ProfileS.tsx
+
 import { View, Text, StyleSheet, ScrollView, Switch, TouchableOpacity, Alert, Image } from 'react-native';
 import CButton from '../components/CButton';
 import { useAuth } from '../contexts/AuthContexts';

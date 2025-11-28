@@ -19,13 +19,14 @@ export default function LoginScreen({ navigation }: any) {
   const isLoginDisabled = () => {
     return email.trim() === '' || password.trim() === '';
   };
-
-  const handleLogin = () => {
+  // cambiar las funciones a async para que tenga congruencia con los async de AuthContext
+  const handleLogin = async () => {
     try {
-      const allowed = login(email, password);
-      if (allowed) {
+      const success = await login(email, password); 
+      if (success) {
         navigation.replace('Tabs', { email });
       }
+      // Si success es falso, el error ya se mostró en AuthContext
     } catch (error) {
       console.log(error);
     }

@@ -1,4 +1,4 @@
-// store/ClientSlice.ts
+
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 export interface ClientProfile {

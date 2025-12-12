@@ -21,9 +21,11 @@ import axios from 'axios';
 import { translateIngredient } from '../../infoutils/ingredientTranslations';
 
 // Obtener dimensiones de la pantalla
+
 const { width } = Dimensions.get('window');
 
 // URL de la API
+//ipconfig para obtener la ip local
 const API_URL = 'http://192.168.1.7:3001'; // Ip localhost
 
 export default function RecipesScreen({ navigation }: any) {

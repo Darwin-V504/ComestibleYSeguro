@@ -19,7 +19,7 @@ export default function HomeScreen({ navigation, route }: any) {
   const [expiringProducts, setExpiringProducts] = useState<InventoryItem[]>([]);
   const { t } = useLanguage();
   
-  const { client } = useClient();
+  const { client } = useClient() as { client: { name?: string; email?: string } };
 
   useEffect(() => {
     const today = new Date();

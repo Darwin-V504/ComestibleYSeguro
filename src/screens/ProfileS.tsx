@@ -295,7 +295,7 @@ export default function ProfileScreen({ navigation }: any) {
                 <Text style={styles.appDescription}>
                     {t('reducingWaste')}
                 </Text>
-                <Text style={styles.appVersion}>{t('version')} 1.2</Text>
+                <Text style={styles.appVersion}>{t('version')} 3.5</Text>
             </View>
         </ScrollView>
     );

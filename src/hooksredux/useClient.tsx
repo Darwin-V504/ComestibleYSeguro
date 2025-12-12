@@ -1,4 +1,4 @@
-// hooksredux/useClient.tsx
+
 import { useAppDispatch, useAppSelector } from "../store/hooks";
 import { setClientProfile, updateClientProfile, updateProfileImage, clearClientProfile } from "../store/ClientSlice";
 

@@ -19,11 +19,11 @@ export default function InventoryScreen({ navigation }: any) {
   const filteredInventory = filter === 'expiring'
     ? inventory.filter(item => {
         const today = new Date();
-        const inTwoDays = new Date();
-        inTwoDays.setDate(today.getDate() + 2);
+        const inFourDays = new Date();
+        inFourDays.setDate(today.getDate() + 4);
         const expDate = new Date(item.expirationDate);
-        // ignore invalid/ unparsable dates and only keep items expiring between today and inTwoDays
-        return !isNaN(expDate.getTime()) && expDate <= inTwoDays && expDate >= today;
+        
+        return !isNaN(expDate.getTime()) && expDate <= inFourDays && expDate >= today;
       })
     : inventory;
 

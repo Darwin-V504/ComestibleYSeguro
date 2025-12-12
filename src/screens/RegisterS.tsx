@@ -24,9 +24,9 @@ export default function RegisterScreen({ navigation }: any) {
     const colors = getThemeColors(theme);
     const styles = getStyles(colors);
 
-    // hooks 
+    // hooks
     const { saveClientProfile } = useClient();
-    const { signUp } = useAuth(); // USAR signUp
+    const { signUp } = useAuth(); // USAR signUp actualizado
 
     const handleRegisterToTabs = async () => {
         try {
@@ -41,26 +41,30 @@ export default function RegisterScreen({ navigation }: any) {
                 return;
             }
 
-            
-            const authSuccess = await signUp(email, password); // usar signUp
-            
+            const profileData = {
+                fullName,
+                phone,
+                birthDate
+            };
+
+            const authSuccess = await signUp(email, password, profileData); // Pasar datos del perfil
+
             if (authSuccess) {
-                //   guardar en Redux solo si el registro fue exitoso
+                // Guardar también en Redux local para compatibilidad
                 saveClientProfile({
                     fullName,
                     email,
                     phone,
                     birthDate
                 });
-
-                // Redireccion a Login para que inicien sesión
+                
                 Alert.alert(
-                    "Registro Exitoso", 
+                    "Registro Exitoso",
                     "Tu cuenta ha sido creada. Ahora inicia sesión con tus credenciales.",
                     [
-                        { 
-                            text: "Iniciar Sesión", 
-                            onPress: () => navigation.navigate('Login') 
+                        {
+                            text: "Iniciar Sesión",
+                            onPress: () => navigation.navigate('Login')
                         }
                     ]
                 );
@@ -80,7 +84,6 @@ export default function RegisterScreen({ navigation }: any) {
 
     const onDateChange = (event: any, date?: Date) => {
         setShowDatePicker(false);
-
         if (date) {
             setSelectedDate(date);
             const formatted = date.toISOString().split("T")[0];
@@ -92,7 +95,6 @@ export default function RegisterScreen({ navigation }: any) {
         <View style={styles.container}>
             <View style={styles.card}>
                 <Text style={styles.titletxt}>Crea tu usuario</Text>
-
                 <CInput
                     value={fullName}
                     type='text'
@@ -100,7 +102,6 @@ export default function RegisterScreen({ navigation }: any) {
                     onChangeText={setFullName}
                     icon={<Ionicons name="person-circle-outline" size={22} color={colors.text} />}
                 />
-
                 <CInput
                     value={email}
                     type='email'
@@ -108,7 +109,6 @@ export default function RegisterScreen({ navigation }: any) {
                     onChangeText={setEmail}
                     icon={<Ionicons name="mail-outline" size={22} color={colors.text} />}
                 />
-
                 <CInput
                     value={password}
                     type='password'
@@ -116,7 +116,6 @@ export default function RegisterScreen({ navigation }: any) {
                     onChangeText={setPassword}
                     icon={<Ionicons name="lock-closed-outline" size={22} color={colors.text} />}
                 />
-
                 <CInput
                     value={confirmPassword}
                     type='password'
@@ -124,7 +123,6 @@ export default function RegisterScreen({ navigation }: any) {
                     onChangeText={setConfirmPassword}
                     icon={<Ionicons name="lock-closed-outline" size={22} color={colors.text} />}
                 />
-
                 <CInput
                     value={phone}
                     type='number'
@@ -132,7 +130,6 @@ export default function RegisterScreen({ navigation }: any) {
                     onChangeText={setPhone}
                     icon={<Ionicons name="call-outline" size={22} color={colors.text} />}
                 />
-
                 {/* Fecha de nacimiento */}
                 <TouchableOpacity onPress={openDatePicker}>
                     <CInput
@@ -143,7 +140,6 @@ export default function RegisterScreen({ navigation }: any) {
                         icon={<Ionicons name="calendar-outline" size={22} color={colors.text} />}
                     />
                 </TouchableOpacity>
-
                 {showDatePicker && (
                     <DateTimePicker
                         mode="date"
@@ -152,9 +148,8 @@ export default function RegisterScreen({ navigation }: any) {
                         onChange={onDateChange}
                     />
                 )}
-
-                <CButton 
-                    title={'Registrarme'} 
+                <CButton
+                    title={'Registrarme'}
                     onPress={handleRegisterToTabs}
                     disabled={!fullName || !email || !password || !confirmPassword}
                 />

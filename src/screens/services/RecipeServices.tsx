@@ -6,9 +6,11 @@ import {
   Image,
   TouchableOpacity,
   Alert,
-  ActivityIndicator
+  ActivityIndicator,
+  Dimensions,
+  ScrollView
 } from 'react-native';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import CButton from '../../components/CButton';
 import { useInventory } from '../../hooksredux/useInventory';
 import { useTheme } from '../../contexts/ThemeContext';
@@ -16,141 +18,13 @@ import { useLanguage } from '../../contexts/LanguageContext';
 import { getThemeColors } from '../../infoutils/theme';
 import { Ionicons } from '@expo/vector-icons';
 import axios from 'axios';
+import { translateIngredient } from '../../infoutils/ingredientTranslations';
 
-// URL de la API - Cambia esto por tu IP local cuando pruebes en dispositivo físico
-const API_URL = 'http://localhost:3001'; // Para emulador
-// const API_URL = 'http://192.168.1.100:3001'; // Para dispositivo físico - cambia la IP
+// Obtener dimensiones de la pantalla
+const { width } = Dimensions.get('window');
 
-// Recetas de respaldo en caso de que falle la API
-const FALLBACK_RECIPES = [
-  {
-    id: '1',
-    title: 'Ensalada de Frutas de Temporada',
-    ingredients: ['Manzanas', 'Leche', 'Yogur'],
-    image: 'https://images.unsplash.com/photo-1564093497595-593b96d80180?w=400',
-    time: 15,
-    difficulty: 'easy',
-    category: 'Fruits',
-    tags: ['healthy', 'quick']
-  },
-  {
-    id: '2',
-    title: 'Sándwich de Pollo y Vegetales',
-    ingredients: ['Pan Integral', 'Pechuga de Pollo', 'Zanahorias'],
-    image: 'https://images.unsplash.com/photo-1561758033-d89a9ad46330?w=400',
-    time: 20,
-    difficulty: 'medium',
-    category: 'Chicken',
-    tags: ['lunch', 'sandwich']
-  },
-  {
-    id: '3',
-    title: 'Batido Energético',
-    ingredients: ['Leche', 'Manzanas', 'Zanahorias'],
-    image: 'https://images.unsplash.com/photo-1570197788417-0e82375c9371?w=400',
-    time: 10,
-    difficulty: 'easy',
-    category: 'Drink',
-    tags: ['breakfast', 'smoothie']
-  },
-  {
-    id: '4',
-    title: 'Omelette de Verduras',
-    ingredients: ['Huevos', 'Zanahorias', 'Leche'],
-    image: 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=400',
-    time: 15,
-    difficulty: 'easy',
-    category: 'Vegetarian',
-    tags: ['breakfast', 'eggs']
-  },
-  {
-    id: '5',
-    title: 'Pasta con Pollo',
-    ingredients: ['Pasta', 'Pechuga de Pollo', 'Tomate'],
-    image: 'https://images.unsplash.com/photo-1563379926898-05f4575a45d8?w=400',
-    time: 30,
-    difficulty: 'medium',
-    category: 'Pasta',
-    tags: ['dinner', 'italian']
-  }
-];
-
-// Función para traducir ingredientes al inglés para la API
-const translateToEnglish = (spanishName: string): string => {
-  const translations: Record<string, string> = {
-    'leche': 'milk',
-    'manzanas': 'apple',
-    'zanahorias': 'carrot',
-    'yogur': 'yogurt',
-    'pan integral': 'bread',
-    'pechuga de pollo': 'chicken',
-    'pan': 'bread',
-    'pollo': 'chicken',
-    'arroz': 'rice',
-    'pasta': 'pasta',
-    'tomate': 'tomato',
-    'tomates': 'tomato',
-    'cebolla': 'onion',
-    'cebollas': 'onion',
-    'queso': 'cheese',
-    'huevos': 'eggs',
-    'huevo': 'egg',
-    'papas': 'potato',
-    'papa': 'potato',
-    'patata': 'potato',
-    'zanahoria': 'carrot',
-    'zanahorias': 'carrot',
-    'lechuga': 'lettuce',
-    'espinacas': 'spinach',
-    'brócoli': 'broccoli',
-    'zanahoria': 'carrot',
-    'carne': 'beef',
-    'res': 'beef',
-    'cerdo': 'pork',
-    'pescado': 'fish',
-    'atún': 'tuna',
-    'salmon': 'salmon',
-    'yogurt': 'yogurt',
-    'mantequilla': 'butter',
-    'aceite': 'oil',
-    'aceite de oliva': 'olive oil',
-    'vinagre': 'vinegar',
-    'sal': 'salt',
-    'pimienta': 'pepper',
-    'azúcar': 'sugar',
-    'harina': 'flour',
-    'limón': 'lemon',
-    'limones': 'lemon',
-    'naranja': 'orange',
-    'naranjas': 'orange',
-    'plátano': 'banana',
-    'plátanos': 'banana',
-    'fresa': 'strawberry',
-    'fresas': 'strawberry',
-    'uva': 'grape',
-    'uvas': 'grape',
-    'piña': 'pineapple',
-    'aguacate': 'avocado',
-    'aguacates': 'avocado',
-    'ajo': 'garlic',
-    'ajos': 'garlic',
-    'perejil': 'parsley',
-    'cilantro': 'coriander',
-    'oreo': 'cookie',
-    'galletas': 'cookies',
-    'chocolate': 'chocolate',
-    'café': 'coffee',
-    'té': 'tea',
-    'agua': 'water',
-    'jugo': 'juice',
-    'refresco': 'soda',
-    'cerveza': 'beer',
-    'vino': 'wine',
-  };
-  
-  const lowerName = spanishName.toLowerCase().trim();
-  return translations[lowerName] || spanishName;
-};
+// URL de la API
+const API_URL = 'http://192.168.1.8:3001'; // Ip localhost
 
 export default function RecipesScreen({ navigation }: any) {
   const { inventory } = useInventory();
@@ -158,30 +32,41 @@ export default function RecipesScreen({ navigation }: any) {
   const [recipes, setRecipes] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [useFallback, setUseFallback] = useState(false);
 
   const { theme } = useTheme();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const colors = getThemeColors(theme);
   const styles = getStyles(colors);
 
-  // Obtener productos que expiran en los próximos 2 días
-  const expiringProducts = inventory.filter(item => {
+  // Usar useMemo para evitar recreación en cada render
+  const { expiringProducts, expiringProductNames } = useMemo(() => {
     const today = new Date();
     const inTwoDays = new Date();
     inTwoDays.setDate(today.getDate() + 2);
-    const expirationDate = new Date(item.expirationDate);
-    return expirationDate <= inTwoDays && expirationDate >= today;
-  });
+    
+    const expiring = inventory.filter(item => {
+      try {
+        const expirationDate = new Date(item.expirationDate);
+        if (isNaN(expirationDate.getTime())) return false;
+        return expirationDate <= inTwoDays && expirationDate >= today;
+      } catch {
+        return false;
+      }
+    });
 
-  const expiringProductNames = expiringProducts.map(item => 
-    item.product.name
-  );
+    const names = expiring.map(item => item.product.name);
+    
+    return {
+      expiringProducts: expiring,
+      expiringProductNames: names
+    };
+  }, [inventory]);
 
-  // Función para buscar recetas en la API
-  const fetchRecipesFromAPI = async () => {
+  // Función para buscar recetas
+  const fetchRecipesFromAPI = useCallback(async () => {
     if (expiringProductNames.length === 0) {
       setRecipes([]);
+      setError(null);
       return;
     }
 
@@ -189,11 +74,12 @@ export default function RecipesScreen({ navigation }: any) {
     setError(null);
 
     try {
-      console.log('Productos próximos a expirar:', expiringProductNames);
-      
       // Traducir ingredientes al inglés
-      const englishIngredients = expiringProductNames.map(translateToEnglish);
-      console.log('Ingredientes traducidos para API:', englishIngredients);
+      const englishIngredients = expiringProductNames.map(translateIngredient);
+      
+      console.log('SOLICITANDO RECETAS A API');
+      console.log('Ingredientes del usuario:', expiringProductNames);
+      console.log('Traducidos para API:', englishIngredients);
       
       const response = await axios.post(
         `${API_URL}/api/recipes/ingredients`,
@@ -201,103 +87,149 @@ export default function RecipesScreen({ navigation }: any) {
           ingredients: englishIngredients
         },
         {
-          timeout: 10000, // 10 segundos timeout
-          headers: {
-            'Content-Type': 'application/json',
-          }
+          timeout: 15000,
+          headers: { 'Content-Type': 'application/json' }
         }
       );
 
-      console.log('Respuesta de API:', response.data);
-
-      if (response.data.success && response.data.recipes.length > 0) {
+      console.log('Respuesta de API:', {
+        success: response.data.success,
+        count: response.data.count,
+        recipesCount: response.data.recipes?.length || 0
+      });
+      
+      if (response.data.success && response.data.recipes && response.data.recipes.length > 0) {
         setRecipes(response.data.recipes);
-        setUseFallback(false);
+        console.log(` API encontró ${response.data.recipes.length} recetas válidas`);
       } else {
-        // Si la API no encuentra recetas, usar las de respaldo
-        console.log('API no encontró recetas, usando fallback');
-        setRecipes(FALLBACK_RECIPES.filter(recipe =>
-          recipe.ingredients.some(ingredient =>
-            expiringProductNames.some(productName =>
-              productName.toLowerCase().includes(ingredient.toLowerCase().split(' ')[0])
-            )
-          )
-        ));
-        setUseFallback(true);
+        setRecipes([]);
+        console.log('API no encontró recetas con esos ingredientes');
       }
     } catch (error: any) {
-      console.error('Error buscando recetas en API:', error.message || error);
-      
-      // Usar recetas de respaldo
-      console.log('Usando recetas de respaldo debido a error de conexión');
-      setRecipes(FALLBACK_RECIPES.filter(recipe =>
-        recipe.ingredients.some(ingredient =>
-          expiringProductNames.some(productName =>
-            productName.toLowerCase().includes(ingredient.toLowerCase().split(' ')[0])
-          )
-        )
-      ));
-      setUseFallback(true);
-      
-      // Mostrar error solo si no hay productos expirando
-      if (expiringProductNames.length > 0) {
-        setError('No se pudo conectar con el servidor de recetas. Mostrando sugerencias locales.');
-      }
+      console.log('Error de conexión con API:', error.message);
+      setRecipes([]);
+      setError(t('apiConnectionError'));
     } finally {
       setLoading(false);
     }
+  }, [expiringProductNames, t]);
+
+  // useEffect con dependencias correctas
+  useEffect(() => {
+    let isMounted = true;
+    
+    if (isMounted) {
+      fetchRecipesFromAPI();
+    }
+    
+    return () => {
+      isMounted = false;
+    };
+  }, [fetchRecipesFromAPI]);
+
+  // Función para traducir dificultad
+  const translateDifficulty = (difficulty: string) => {
+    if (difficulty === 'easy') return t('easy');
+    if (difficulty === 'medium') return t('medium');
+    if (difficulty === 'hard') return t('hard');
+    return difficulty;
   };
 
-  useEffect(() => {
-    fetchRecipesFromAPI();
-  }, [expiringProductNames]);
-
-  const RecipeCard = ({ recipe }: { recipe: any }) => (
-    <TouchableOpacity
-      style={styles.recipeCard}
-      onPress={() => setSelectedRecipe(recipe)}
-    >
-      <Image source={{ uri: recipe.image }} style={styles.recipeImage} />
-      <View style={styles.recipeInfo}>
-        <Text style={styles.recipeTitle}>{recipe.title}</Text>
+  const RecipeCard = ({ recipe }: { recipe: any }) => {
+    // Limitar el título si es muy largo
+    const displayTitle = recipe.title.length > 40 
+      ? recipe.title.substring(0, 40) + '...' 
+      : recipe.title;
+    
+    return (
+      <TouchableOpacity
+        style={styles.recipeCard}
+        onPress={() => navigation.navigate('RecipeDetail', { recipe })}
+      >
+        {/* Imagen de la receta */}
+        <Image source={{ uri: recipe.image }} style={styles.recipeImage} />
         
-        <View style={styles.recipeMeta}>
-          <View style={styles.metaItem}>
-            <Ionicons name="time-outline" size={14} color={colors.textSecondary} />
-            <Text style={styles.metaText}>{recipe.time} {t('minutes')}</Text>
+        {/* Overlay de información rápida en la imagen */}
+        <View style={styles.imageOverlay}>
+          <View style={styles.timeBadge}>
+            <Ionicons name="time-outline" size={14} color="#FFFFFF" />
+            <Text style={styles.timeText}>{recipe.time} {t('minutes')}</Text>
           </View>
           
-          <View style={styles.metaItem}>
-            <Ionicons name="speedometer-outline" size={14} color={colors.textSecondary} />
-            <Text style={styles.metaText}>
-              {recipe.difficulty === 'easy' ? t('easy') : 
-               recipe.difficulty === 'medium' ? t('medium') : t('hard')}
+          <View style={[styles.difficultyBadge, 
+            recipe.difficulty === 'easy' ? styles.easyBadge :
+            recipe.difficulty === 'medium' ? styles.mediumBadge :
+            styles.hardBadge
+          ]}>
+            <Text style={styles.difficultyText}>
+              {translateDifficulty(recipe.difficulty)}
             </Text>
           </View>
-          
-          {recipe.category && (
-            <View style={styles.metaItem}>
-              <Ionicons name="fast-food-outline" size={14} color={colors.textSecondary} />
-              <Text style={styles.metaText}>{recipe.category}</Text>
-            </View>
-          )}
         </View>
         
-        <View style={styles.ingredients}>
-          {recipe.ingredients.slice(0, 3).map((ingredient: string, index: number) => (
-            <View key={index} style={styles.ingredientTag}>
-              <Text style={styles.ingredientText}>{ingredient}</Text>
-            </View>
-          ))}
-          {recipe.ingredients.length > 3 && (
-            <View style={styles.moreIngredients}>
-              <Text style={styles.moreIngredientsText}>+{recipe.ingredients.length - 3} más</Text>
+        {/* Contenido de la tarjeta */}
+        <View style={styles.recipeContent}>
+          {/* Título y categoría */}
+          <View style={styles.titleRow}>
+            <Text style={styles.recipeTitle} numberOfLines={2}>{displayTitle}</Text>
+            {recipe.category && (
+              <View style={styles.categoryBadge}>
+                <Text style={styles.categoryText}>
+                  {recipe.category}
+                </Text>
+              </View>
+            )}
+          </View>
+          
+          {/* Ingredientes coincidentes */}
+          {recipe.matchedIngredients && recipe.matchedIngredients.length > 0 && (
+            <View style={styles.matchedContainer}>
+              <Ionicons name="checkmark-circle" size={14} color={colors.success} />
+              <Text style={styles.matchedText}>
+                {t('contains')}: {recipe.matchedIngredients.join(', ')}
+              </Text>
             </View>
           )}
+          
+          {/* Lista de ingredientes de la receta */}
+          <Text style={styles.ingredientsTitle}>{t('ingredients')}:</Text>
+          
+          <ScrollView 
+            horizontal 
+            showsHorizontalScrollIndicator={false}
+            style={styles.ingredientsScroll}
+            contentContainerStyle={styles.ingredientsScrollContent}
+          >
+            {recipe.ingredients.slice(0, 8).map((ingredient: string, index: number) => (
+              <View key={index} style={styles.ingredientChip}>
+                <Ionicons name="restaurant-outline" size={12} color={colors.primary} />
+                <Text style={styles.ingredientChipText} numberOfLines={1}>
+                  {ingredient}
+                </Text>
+              </View>
+            ))}
+            
+            {recipe.ingredients.length > 8 && (
+              <View style={styles.moreChip}>
+                <Text style={styles.moreChipText}>
+                  +{recipe.ingredients.length - 8} {t('more')}
+                </Text>
+              </View>
+            )}
+          </ScrollView>
+          
+          {/* Botón para ver detalles COMPLETOS */}
+          <TouchableOpacity
+            style={styles.viewDetailsButton}
+            onPress={() => navigation.navigate('RecipeDetail', { recipe })}
+          >
+            <Text style={styles.viewDetailsText}>{t('viewFullRecipe')}</Text>
+            <Ionicons name="chevron-forward" size={16} color={colors.primary} />
+          </TouchableOpacity>
         </View>
-      </View>
-    </TouchableOpacity>
-  );
+      </TouchableOpacity>
+    );
+  };
 
   return (
     <View style={styles.container}>
@@ -307,12 +239,22 @@ export default function RecipesScreen({ navigation }: any) {
           {t('basedOnExpiring')} ({expiringProductNames.length} {t('product')})
         </Text>
         
-        {useFallback && (
-          <View style={styles.warningBox}>
-            <Ionicons name="warning-outline" size={16} color={colors.warning} />
-            <Text style={styles.warningText}>
-              Modo offline: usando recetas locales
-            </Text>
+        {expiringProductNames.length > 0 && (
+          <View style={styles.currentIngredients}>
+            <Text style={styles.ingredientsLabel}>{t('yourIngredients')}:</Text>
+            <ScrollView 
+              horizontal 
+              showsHorizontalScrollIndicator={false}
+              style={styles.currentIngredientsScroll}
+            >
+              {expiringProductNames.map((ingredient, index) => (
+                <View key={index} style={styles.currentIngredientChip}>
+                  <Text style={styles.currentIngredientText} numberOfLines={1}>
+                    {ingredient}
+                  </Text>
+                </View>
+              ))}
+            </ScrollView>
           </View>
         )}
       </View>
@@ -320,131 +262,185 @@ export default function RecipesScreen({ navigation }: any) {
       {loading ? (
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={colors.primary} />
-          <Text style={styles.loadingText}>{t('loading')} recetas...</Text>
+          <Text style={styles.loadingText}>{t('loading')} {t('recipes').toLowerCase()}...</Text>
         </View>
-      ) : expiringProducts.length === 0 ? (
+      ) : expiringProductNames.length === 0 ? (
         <View style={styles.emptyState}>
           <Ionicons name="restaurant-outline" size={64} color={colors.textSecondary} />
           <Text style={styles.emptyText}>{t('noProductsForRecipes')}</Text>
           <Text style={styles.emptySubtext}>
             {t('addProductsForRecipes')}
           </Text>
-          <CButton 
+          <CButton
             title={t('scanNew')}
             onPress={() => navigation.navigate('ScanProduct')}
             variant="primary"
             size="medium"
-            
+           
           />
         </View>
       ) : recipes.length === 0 ? (
         <View style={styles.emptyState}>
           <Ionicons name="search-outline" size={64} color={colors.textSecondary} />
-          <Text style={styles.emptyText}>{t('noRecipesAvailable')}</Text>
+          <Text style={styles.emptyText}>{t('noRecipesFound')}</Text>
           <Text style={styles.emptySubtext}>
-            {t('noRecipesFound')}
+            {t('noRecipesForIngredients')}
           </Text>
           <CButton
-            title="Intentar de nuevo"
+            title={t('tryAgain')}
             onPress={fetchRecipesFromAPI}
             variant="secondary"
             size="medium"
-            style={{ marginTop: 20 }}
+          
+          />
+          <CButton
+            title={t('scanNew')}
+            onPress={() => navigation.navigate('ScanProduct')}
+            variant="tertiary"
+            size="medium"
+            
           />
         </View>
       ) : (
         <>
           {error && (
             <View style={styles.errorBox}>
-              <Ionicons name="information-circle-outline" size={16} color={colors.textSecondary} />
+              <Ionicons name="warning-outline" size={16} color={colors.error} />
               <Text style={styles.errorText}>{error}</Text>
             </View>
           )}
+          
+          <Text style={styles.resultsCount}>
+            {recipes.length} {t('recipe')}{recipes.length !== 1 ? 's' : ''} {t('found')}
+          </Text>
           
           <FlatList
             data={recipes}
             keyExtractor={(item) => item.id.toString()}
             renderItem={({ item }) => <RecipeCard recipe={item} />}
             showsVerticalScrollIndicator={false}
-            contentContainerStyle={{ paddingBottom: 20 }}
+            contentContainerStyle={styles.recipesList}
+            ItemSeparatorComponent={() => <View style={styles.separator} />}
           />
         </>
       )}
 
-      {/* Modal de detalle de receta */}
+      {/* Modal de PREVIEW rápida (mantenido para vista rápida) */}
       {selectedRecipe && (
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
-            <TouchableOpacity
-              style={styles.closeButton}
-              onPress={() => setSelectedRecipe(null)}
-            >
-              <Ionicons name="close" size={24} color={colors.text} />
-            </TouchableOpacity>
-            
-            <Image source={{ uri: selectedRecipe.image }} style={styles.modalImage} />
-            <Text style={styles.modalTitle}>{selectedRecipe.title}</Text>
-            
-            <View style={styles.modalMeta}>
-              <View style={styles.modalMetaItem}>
-                <Ionicons name="time-outline" size={16} color={colors.textSecondary} />
-                <Text style={styles.modalMetaText}>{selectedRecipe.time} {t('minutes')}</Text>
+            <ScrollView showsVerticalScrollIndicator={false} style={styles.modalScroll}>
+              {/* Encabezado del modal */}
+              <View style={styles.modalHeader}>
+                <Text style={styles.modalTitle} numberOfLines={2}>{selectedRecipe.title}</Text>
+                <TouchableOpacity
+                  style={styles.closeButton}
+                  onPress={() => setSelectedRecipe(null)}
+                >
+                  <Ionicons name="close" size={24} color={colors.text} />
+                </TouchableOpacity>
               </View>
               
-              <View style={styles.modalMetaItem}>
-                <Ionicons name="speedometer-outline" size={16} color={colors.textSecondary} />
-                <Text style={styles.modalMetaText}>
-                  {selectedRecipe.difficulty === 'easy' ? t('easy') : 
-                   selectedRecipe.difficulty === 'medium' ? t('medium') : t('hard')}
-                </Text>
+              {/* Imagen */}
+              <Image source={{ uri: selectedRecipe.image }} style={styles.modalImage} />
+              
+              {/* Información rápida */}
+              <View style={styles.modalQuickInfo}>
+                <View style={styles.quickInfoItem}>
+                  <Ionicons name="time-outline" size={20} color={colors.primary} />
+                  <Text style={styles.quickInfoText}>{selectedRecipe.time} {t('minutes')}</Text>
+                </View>
+                
+                <View style={styles.quickInfoItem}>
+                  <Ionicons name="speedometer-outline" size={20} color={colors.primary} />
+                  <Text style={styles.quickInfoText}>
+                    {translateDifficulty(selectedRecipe.difficulty)}
+                  </Text>
+                </View>
+                
+                {selectedRecipe.category && (
+                  <View style={styles.quickInfoItem}>
+                    <Ionicons name="fast-food-outline" size={20} color={colors.primary} />
+                    <Text style={styles.quickInfoText}>
+                      {selectedRecipe.category}
+                    </Text>
+                  </View>
+                )}
               </View>
               
-              {selectedRecipe.category && (
-                <View style={styles.modalMetaItem}>
-                  <Ionicons name="fast-food-outline" size={16} color={colors.textSecondary} />
-                  <Text style={styles.modalMetaText}>{selectedRecipe.category}</Text>
+              {/* Ingredientes coincidentes */}
+              {selectedRecipe.matchedIngredients && selectedRecipe.matchedIngredients.length > 0 && (
+                <View style={styles.matchedInfo}>
+                  <Ionicons name="checkmark-circle" size={18} color={colors.success} />
+                  <Text style={styles.matchedInfoText}>
+                    {t('containsYourIngredients')}: {selectedRecipe.matchedIngredients.join(', ')}
+                  </Text>
                 </View>
               )}
-            </View>
-            
-            {selectedRecipe.tags && selectedRecipe.tags.length > 0 && (
-              <View style={styles.tagsContainer}>
-                {selectedRecipe.tags.slice(0, 3).map((tag: string, index: number) => (
-                  <View key={index} style={styles.tag}>
-                    <Text style={styles.tagText}>{tag}</Text>
-                  </View>
-                ))}
-              </View>
-            )}
-            
-            <Text style={styles.sectionTitle}>{t('ingredients')}:</Text>
-            <View style={styles.ingredientsList}>
-              {selectedRecipe.ingredients.map((ingredient: string, index: number) => (
-                <View key={index} style={styles.ingredientItem}>
-                  <Ionicons name="checkmark-circle-outline" size={16} color={colors.success} />
-                  <Text style={styles.ingredientItemText}>{ingredient}</Text>
-                </View>
-              ))}
-            </View>
-            
-            <View style={styles.modalButtons}>
-              <CButton
-                title={t('prepareRecipe')}
-                onPress={() => {
-                  Alert.alert(t('enjoyMeal'), `${t('preparing')} ${selectedRecipe.title}`);
-                  setSelectedRecipe(null);
-                }}
-                variant="primary"
-                size="medium"
-              />
               
-              <CButton
-                title="Cerrar"
-                onPress={() => setSelectedRecipe(null)}
-                variant="tertiary"
-                size="medium"
-              />
-            </View>
+              {/* Vista previa de ingredientes */}
+              <View style={styles.modalSection}>
+                <Text style={styles.sectionTitle}>
+                  <Ionicons name="restaurant-outline" size={18} color={colors.text} /> 
+                  {t('ingredients')} ({selectedRecipe.ingredients.length})
+                </Text>
+                <View style={styles.ingredientsGrid}>
+                  {selectedRecipe.ingredients.slice(0, 6).map((ingredient: string, index: number) => (
+                    <View key={index} style={styles.modalIngredientItem}>
+                      <Ionicons name="checkmark" size={14} color={colors.success} />
+                      <Text style={styles.modalIngredientText} numberOfLines={1}>{ingredient}</Text>
+                    </View>
+                  ))}
+                  
+                  {selectedRecipe.ingredients.length > 6 && (
+                    <View style={styles.moreIngredientsPreview}>
+                      <Text style={styles.moreIngredientsText}>
+                        +{selectedRecipe.ingredients.length - 6} {t('moreIngredients')}
+                      </Text>
+                    </View>
+                  )}
+                </View>
+              </View>
+              
+              {/* Vista previa de instrucciones */}
+              {selectedRecipe.instructions && (
+                <View style={styles.modalSection}>
+                  <Text style={styles.sectionTitle}>
+                    <Ionicons name="book-outline" size={18} color={colors.text} /> 
+                    {t('instructions')}
+                  </Text>
+                  <Text style={styles.instructionsPreview} numberOfLines={6}>
+                    {selectedRecipe.instructions}
+                  </Text>
+                  {selectedRecipe.instructions.length > 300 && (
+                    <Text style={styles.viewFullText}>
+                      {t('viewFullInstructions')}
+                    </Text>
+                  )}
+                </View>
+              )}
+              
+              {/* Botón para ver receta completa */}
+              <View style={styles.modalActions}>
+                <CButton
+                  title={t('viewFullRecipe')}
+                  onPress={() => {
+                    setSelectedRecipe(null);
+                    navigation.navigate('RecipeDetail', { recipe: selectedRecipe });
+                  }}
+                  variant="primary"
+                  size="large"
+                  
+                />
+                
+                <CButton
+                  title={t('close')}
+                  onPress={() => setSelectedRecipe(null)}
+                  variant="tertiary"
+                  size="medium"
+                />
+              </View>
+            </ScrollView>
           </View>
         </View>
       )}
@@ -456,239 +452,439 @@ const getStyles = (colors: any) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,
-    padding: 16,
   },
   header: {
-    marginBottom: 20,
+    padding: 20,
+    backgroundColor: colors.card,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
   },
   title: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: 'bold',
     color: colors.text,
     marginBottom: 4,
   },
   subtitle: {
-    fontSize: 14,
+    fontSize: 16,
     color: colors.textSecondary,
-    marginBottom: 8,
+    marginBottom: 12,
   },
   warningBox: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: colors.warning + '20',
-    padding: 10,
-    borderRadius: 8,
-    marginTop: 10,
+    padding: 12,
+    borderRadius: 10,
+    marginBottom: 12,
   },
   warningText: {
     marginLeft: 8,
-    fontSize: 12,
+    fontSize: 14,
     color: colors.warning,
     flex: 1,
+  },
+  currentIngredients: {
+    marginTop: 8,
+  },
+  ingredientsLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: colors.text,
+    marginBottom: 8,
+  },
+  currentIngredientsScroll: {
+    marginHorizontal: -20,
+    paddingHorizontal: 20,
+  },
+  currentIngredientChip: {
+    backgroundColor: colors.primary + '20',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    marginRight: 8,
+    marginBottom: 4,
+  },
+  currentIngredientText: {
+    fontSize: 13,
+    color: colors.primary,
+    fontWeight: '500',
+    maxWidth: 120,
   },
   errorBox: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: colors.error + '20',
-    padding: 10,
-    borderRadius: 8,
-    marginBottom: 16,
+    padding: 12,
+    borderRadius: 10,
+    marginHorizontal: 20,
+    marginTop: 16,
+    marginBottom: 8,
   },
   errorText: {
     marginLeft: 8,
-    fontSize: 12,
+    fontSize: 14,
     color: colors.error,
     flex: 1,
+  },
+  resultsCount: {
+    fontSize: 16,
+    color: colors.textSecondary,
+    marginHorizontal: 20,
+    marginTop: 16,
+    marginBottom: 12,
+    fontStyle: 'italic',
   },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    paddingVertical: 40,
   },
   loadingText: {
     marginTop: 16,
-    fontSize: 16,
+    fontSize: 18,
     color: colors.textSecondary,
   },
+  recipesList: {
+    paddingHorizontal: 16,
+    paddingBottom: 30,
+  },
+  separator: {
+    height: 16,
+  },
+  
+  // Estilos para card de receta
   recipeCard: {
     backgroundColor: colors.card,
-    borderRadius: 12,
-    marginBottom: 16,
-    shadowColor: colors.black,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    borderRadius: 16,
     overflow: 'hidden',
+    shadowColor: colors.black,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 5,
+    minHeight: 380,
   },
   recipeImage: {
     width: '100%',
-    height: 150,
+    height: 200,
     resizeMode: 'cover',
   },
-  recipeInfo: {
-    padding: 16,
-  },
-  recipeTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: colors.text,
-    marginBottom: 8,
-  },
-  recipeMeta: {
+  imageOverlay: {
+    position: 'absolute',
+    top: 12,
+    left: 12,
+    right: 12,
     flexDirection: 'row',
-    flexWrap: 'wrap',
-    marginBottom: 12,
-    gap: 12,
+    justifyContent: 'space-between',
   },
-  metaItem: {
+  timeBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-  },
-  metaText: {
-    marginLeft: 4,
-    fontSize: 12,
-    color: colors.textSecondary,
-  },
-  ingredients: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 6,
-  },
-  ingredientTag: {
-    backgroundColor: colors.backgroundAlt,
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
     paddingHorizontal: 10,
     paddingVertical: 6,
-    borderRadius: 16,
+    borderRadius: 20,
   },
-  ingredientText: {
+  timeText: {
+    color: '#FFFFFF',
     fontSize: 12,
-    color: colors.text,
+    fontWeight: '600',
+    marginLeft: 4,
   },
-  moreIngredients: {
+  difficultyBadge: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+  },
+  easyBadge: {
+    backgroundColor: colors.success + 'CC',
+  },
+  mediumBadge: {
+    backgroundColor: colors.warning + 'CC',
+  },
+  hardBadge: {
+    backgroundColor: colors.error + 'CC',
+  },
+  difficultyText: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  recipeContent: {
+    padding: 20,
+    flex: 1,
+  },
+  titleRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 12,
+  },
+  recipeTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: colors.text,
+    flex: 1,
+    marginRight: 12,
+    lineHeight: 24,
+  },
+  categoryBadge: {
     backgroundColor: colors.primary + '20',
     paddingHorizontal: 10,
     paddingVertical: 6,
-    borderRadius: 16,
+    borderRadius: 12,
+    alignSelf: 'flex-start',
   },
-  moreIngredientsText: {
+  categoryText: {
     fontSize: 12,
     color: colors.primary,
     fontWeight: '600',
   },
+  matchedContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.success + '15',
+    padding: 12,
+    borderRadius: 12,
+    marginBottom: 16,
+  },
+  matchedText: {
+    marginLeft: 8,
+    fontSize: 14,
+    color: colors.success,
+    flex: 1,
+  },
+  ingredientsTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: colors.text,
+    marginBottom: 10,
+  },
+  ingredientsScroll: {
+    marginHorizontal: -20,
+    paddingHorizontal: 20,
+    marginBottom: 16,
+  },
+  ingredientsScrollContent: {
+    paddingRight: 40,
+  },
+  ingredientChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.backgroundAlt,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 20,
+    marginRight: 8,
+    minWidth: 100,
+    maxWidth: 150,
+  },
+  ingredientChipText: {
+    marginLeft: 6,
+    fontSize: 13,
+    color: colors.text,
+    flex: 1,
+  },
+  moreChip: {
+    backgroundColor: colors.primary + '20',
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    minWidth: 80,
+  },
+  moreChipText: {
+    fontSize: 13,
+    color: colors.primary,
+    fontWeight: '600',
+  },
+  viewDetailsButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
+    marginTop: 'auto',
+  },
+  viewDetailsText: {
+    fontSize: 16,
+    color: colors.primary,
+    fontWeight: '600',
+    marginRight: 8,
+  },
+  
   emptyState: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingVertical: 60,
+    paddingHorizontal: 40,
   },
   emptyText: {
-    fontSize: 18,
+    fontSize: 20,
     color: colors.text,
     marginTop: 16,
     marginBottom: 8,
     textAlign: 'center',
+    fontWeight: '600',
   },
   emptySubtext: {
-    fontSize: 14,
+    fontSize: 16,
     color: colors.textSecondary,
     textAlign: 'center',
-    paddingHorizontal: 20,
-    marginBottom: 20,
+    marginBottom: 30,
+    lineHeight: 22,
   },
+  
+  // Estilos para preview
   modalOverlay: {
     position: 'absolute',
     top: 0,
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: 'rgba(0,0,0,0.7)',
+    backgroundColor: 'rgba(0,0,0,0.8)',
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 20,
+    padding: 16,
     zIndex: 1000,
   },
   modalContent: {
     backgroundColor: colors.card,
-    borderRadius: 20,
-    padding: 20,
+    borderRadius: 24,
     width: '100%',
     maxHeight: '85%',
+    overflow: 'hidden',
+  },
+  modalScroll: {
+    flex: 1,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    padding: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+  },
+  modalTitle: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    color: colors.text,
+    flex: 1,
+    marginRight: 16,
+    lineHeight: 26,
   },
   closeButton: {
-    alignSelf: 'flex-end',
     padding: 4,
-    marginBottom: 10,
+    marginTop: -4,
   },
   modalImage: {
     width: '100%',
     height: 200,
-    borderRadius: 12,
-    marginBottom: 16,
+    resizeMode: 'cover',
   },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: colors.text,
-    marginBottom: 12,
-    textAlign: 'center',
-  },
-  modalMeta: {
+  modalQuickInfo: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    marginBottom: 16,
-    flexWrap: 'wrap',
-    gap: 12,
+    padding: 20,
+    backgroundColor: colors.backgroundAlt,
   },
-  modalMetaItem: {
+  quickInfoItem: {
+    alignItems: 'center',
+    minWidth: 80,
+  },
+  quickInfoText: {
+    marginTop: 6,
+    fontSize: 14,
+    color: colors.text,
+    fontWeight: '600',
+    textAlign: 'center',
+  },
+  matchedInfo: {
     flexDirection: 'row',
     alignItems: 'center',
-  },
-  modalMetaText: {
-    marginLeft: 6,
-    fontSize: 14,
-    color: colors.textSecondary,
-  },
-  tagsContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 6,
-    marginBottom: 16,
-    justifyContent: 'center',
-  },
-  tag: {
-    backgroundColor: colors.primary + '20',
-    paddingHorizontal: 10,
-    paddingVertical: 4,
+    backgroundColor: colors.success + '20',
+    padding: 16,
+    marginHorizontal: 20,
+    marginTop: 20,
     borderRadius: 12,
   },
-  tagText: {
-    fontSize: 11,
-    color: colors.primary,
-    fontWeight: '500',
+  matchedInfoText: {
+    marginLeft: 10,
+    fontSize: 15,
+    color: colors.success,
+    flex: 1,
+  },
+  modalSection: {
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
   },
   sectionTitle: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: 'bold',
     color: colors.text,
-    marginBottom: 12,
-  },
-  ingredientsList: {
-    marginBottom: 20,
-  },
-  ingredientItem: {
+    marginBottom: 16,
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 8,
   },
-  ingredientItemText: {
-    marginLeft: 10,
-    fontSize: 14,
+  ingredientsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+  },
+  modalIngredientItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: '48%',
+    marginBottom: 12,
+    paddingRight: 8,
+  },
+  modalIngredientText: {
+    marginLeft: 8,
+    fontSize: 15,
     color: colors.textSecondary,
     flex: 1,
   },
-  modalButtons: {
-    gap: 12,
+  moreIngredientsPreview: {
+    width: '100%',
+    alignItems: 'center',
+    marginTop: 8,
+    padding: 10,
+    backgroundColor: colors.primary + '10',
+    borderRadius: 10,
+  },
+  moreIngredientsText: {
+    fontSize: 14,
+    color: colors.primary,
+    fontStyle: 'italic',
+    fontWeight: '500',
+  },
+  instructionsPreview: {
+    fontSize: 15,
+    color: colors.textSecondary,
+    lineHeight: 22,
+    textAlign: 'justify',
+  },
+  viewFullText: {
+    fontSize: 14,
+    color: colors.primary,
+    fontStyle: 'italic',
     marginTop: 10,
+    textAlign: 'center',
+    fontWeight: '500',
+  },
+  modalActions: {
+    padding: 20,
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
+    gap: 12,
+  },
+  viewFullButton: {
+    marginBottom: 8,
   },
 });

@@ -136,6 +136,7 @@ export const translations = {
     recipeSaved: 'Recipe saved',
     recipeSavedMessage: 'You have saved this recipe to your favorites',
     save: 'Save',
+    noRecipesForIngredients: 'No recipes found for your ingredients',
 
      // Categories
     chicken: 'Chicken',
@@ -372,6 +373,7 @@ export const translations = {
     recipeSaved: 'Receta guardada',
     recipeSavedMessage: 'Has guardado esta receta en tus favoritos',
     save: 'Guardar',
+    noRecipesForIngredients: 'No se encontraron recetas para tus ingredientes',
     
     // Categorías api
     chicken: 'Pollo',

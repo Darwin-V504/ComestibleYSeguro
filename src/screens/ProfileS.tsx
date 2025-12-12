@@ -25,10 +25,10 @@ export default function ProfileScreen({ navigation }: any) {
 
     const expiringProducts = inventory.filter(item => {
         const today = new Date();
-        const inTwoDays = new Date();
-        inTwoDays.setDate(today.getDate() + 2);
+        const inFourDays = new Date();
+        inFourDays.setDate(today.getDate() + 4);
         const expirationDate = new Date(item.expirationDate);
-        return expirationDate <= inTwoDays && expirationDate >= today;
+        return expirationDate <= inFourDays && expirationDate >= today;
     });
 
     const totalProducts = inventory.length;

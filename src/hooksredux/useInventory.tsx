@@ -37,7 +37,7 @@ export const useInventory = () => {
   // Obtener productos próximos a expirar
   const getExpiringProducts = useCallback(() => {
     const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 2);
+    tomorrow.setDate(tomorrow.getDate() + 4);
     return inventory.filter(item => new Date(item.expirationDate) <= tomorrow);
   }, [inventory]);
 

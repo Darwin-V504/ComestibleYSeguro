@@ -23,13 +23,13 @@ export default function HomeScreen({ navigation, route }: any) {
 
   useEffect(() => {
     const today = new Date();
-    const inTwoDays = new Date();
-    inTwoDays.setDate(today.getDate() + 2);
+    const inFourDays = new Date();
+    inFourDays.setDate(today.getDate() + 4);
 
     const expiring = inventory
       .filter(item => {
         const expDate = new Date(item.expirationDate).getTime();
-        return expDate <= inTwoDays.getTime() && expDate >= today.getTime();
+        return expDate <= inFourDays.getTime() && expDate >= today.getTime();
       })
       .map(item => ({
         ...item,

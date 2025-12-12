@@ -24,7 +24,7 @@ import { translateIngredient } from '../../infoutils/ingredientTranslations';
 const { width } = Dimensions.get('window');
 
 // URL de la API
-const API_URL = 'http://192.168.1.8:3001'; // Ip localhost
+const API_URL = 'http://192.168.1.7:3001'; // Ip localhost
 
 export default function RecipesScreen({ navigation }: any) {
   const { inventory } = useInventory();
@@ -41,14 +41,14 @@ export default function RecipesScreen({ navigation }: any) {
   // Usar useMemo para evitar recreación en cada render
   const { expiringProducts, expiringProductNames } = useMemo(() => {
     const today = new Date();
-    const inTwoDays = new Date();
-    inTwoDays.setDate(today.getDate() + 2);
+    const inFourDays = new Date();
+    inFourDays.setDate(today.getDate() + 4);
     
     const expiring = inventory.filter(item => {
       try {
         const expirationDate = new Date(item.expirationDate);
         if (isNaN(expirationDate.getTime())) return false;
-        return expirationDate <= inTwoDays && expirationDate >= today;
+        return expirationDate <= inFourDays && expirationDate >= today;
       } catch {
         return false;
       }

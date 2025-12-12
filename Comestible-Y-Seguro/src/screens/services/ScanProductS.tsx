@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Alert } from 'react-native';
-import { CameraView, useCameraPermissions } from 'expo-camera';
+import { CameraView, useCameraPermissions, BarcodeScanningResult } from 'expo-camera';
 import CButton from '../../components/CButton';
 import { useInventory } from '../../hooksredux/useInventory';
 import { useTheme } from '../../contexts/ThemeContext';

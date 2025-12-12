@@ -8,6 +8,8 @@ import IndexS from '../screens/IndexS';
 import ScanProductScreen from '../screens/services/ScanProductS';
 import RecipesScreen from '../screens/services/RecipeServices';
 import ManualAddScreen from '../screens/services/ManualAddServices'; 
+import RecipeDetailScreen from '../screens/services/RecipeDetailScreen';
+
 
 export type RootStackParamList = {
     Login: undefined;
@@ -18,7 +20,10 @@ export type RootStackParamList = {
     ScanProduct: undefined;
     Recipes: undefined;
     ManualAdd: undefined; 
+    RecipeDetail: { recipeId: string  };
+
 }
+
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -63,6 +68,21 @@ export default function StackNavigator() {
                     headerTintColor: '#ffffffff',
                 }}
             />
+            <Stack.Screen
+            name="RecipeDetail"
+            component={RecipeDetailScreen}
+            options={({
+                route
+            }) => ({
+                headerShown: true,
+                title: 'Detalles de Receta',
+                headerStyle: { backgroundColor: '#2E8B57' },
+                headerTintColor: '#FFFFFF',
+         
+            })}
+            />
+            
+
         </Stack.Navigator>
     );
 }

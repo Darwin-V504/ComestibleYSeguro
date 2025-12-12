@@ -1,42 +1,46 @@
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { useEffect, useState } from 'react';
 import CButton from '../components/CButton';
-import { useInventory } from '../hooksredux/useInventory'; 
+import { useInventory } from '../hooksredux/useInventory';
 import { useAuth } from '../contexts/AuthContexts';
 import { useTheme } from '../contexts/ThemeContext';
 import { getThemeColors } from '../infoutils/theme';
-import { InventoryItem } from '../infoutils/theme/types/Products'; 
+import { InventoryItem } from '../infoutils/types/Products';
 import { useLanguage } from '../contexts/LanguageContext';
 import { Ionicons } from '@expo/vector-icons';
+import { useClient } from '../hooksredux/useClient';
 
 export default function HomeScreen({ navigation, route }: any) {
-  const { inventory } = useInventory(); 
+  const { inventory } = useInventory();
   const { user } = useAuth();
   const { theme } = useTheme();
   const colors = getThemeColors(theme);
   const styles = getStyles(colors);
   const [expiringProducts, setExpiringProducts] = useState<InventoryItem[]>([]);
   const { t } = useLanguage();
+  
+  const { client } = useClient();
 
   useEffect(() => {
     const today = new Date();
-    const inTwoDays = new Date();
-    inTwoDays.setDate(today.getDate() + 2);
-    
-    // Ensure expirationDate is compared as a Date/timestamp (handles string or Date)
+    const inFourDays = new Date();
+    inFourDays.setDate(today.getDate() + 4);
+
     const expiring = inventory
       .filter(item => {
         const expDate = new Date(item.expirationDate).getTime();
-        return expDate <= inTwoDays.getTime() && expDate >= today.getTime();
+        return expDate <= inFourDays.getTime() && expDate >= today.getTime();
       })
       .map(item => ({
         ...item,
         addedDate: new Date(item.addedDate),
         expirationDate: new Date(item.expirationDate),
       }));
+
     setExpiringProducts(expiring);
   }, [inventory]);
 
+  const displayName = client.name || user?.email?.split('@')[0] || t('user');
 
   const handleScanProduct = () => {
     navigation.navigate('ScanProduct');
@@ -52,9 +56,27 @@ export default function HomeScreen({ navigation, route }: any) {
 
   return (
     <ScrollView style={styles.container}>
+      {/* Info del usuario con redux */}
       <View style={styles.header}>
-        <Text style={styles.welcome}>{t('welcome')}, {user?.email || t('user')}</Text>
+        <Text style={styles.welcome}>{t('welcome')}, {displayName}!</Text>
         <Text style={styles.subtitle}>{t('managePantry')}</Text>
+        
+        {(client.name || client.email) && (
+          <View style={styles.userInfoContainer}>
+            {client.name && (
+              <View style={styles.userInfoItem}>
+                <Ionicons name="person-circle" size={16} color={colors.textSecondary} />
+                <Text style={styles.userInfoText}>{client.name}</Text>
+              </View>
+            )}
+            {client.email && (
+              <View style={styles.userInfoItem}>
+                <Ionicons name="mail" size={16} color={colors.textSecondary} />
+                <Text style={styles.userInfoText}>{client.email}</Text>
+              </View>
+            )}
+          </View>
+        )}
       </View>
 
       {/* Resumen Rápido */}
@@ -121,7 +143,7 @@ export default function HomeScreen({ navigation, route }: any) {
           {t('planMeals')}
         </Text>
       </View>
-
+      
       {/* Estadísticas de impacto */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>{t('yourImpact')}</Text>
@@ -161,6 +183,20 @@ const getStyles = (colors: any) => StyleSheet.create({
   },
   subtitle: {
     fontSize: 16,
+    color: colors.textSecondary,
+    marginBottom: 8,
+  },
+  userInfoContainer: {
+    marginTop: 8,
+    gap: 6,
+  },
+  userInfoItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  userInfoText: {
+    fontSize: 14,
     color: colors.textSecondary,
   },
   statsContainer: {

@@ -7,28 +7,7 @@ import { useTheme } from '../../contexts/ThemeContext';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { getThemeColors } from '../../infoutils/theme';
 import { Ionicons } from '@expo/vector-icons';
-
-// Definir el tipo para la base de datos de productos
-type ProductDatabase = {
-  [key: string]: {
-    name: string;
-    category: string;
-    expirationDays: number;
-  };
-};
-type update = {
-
-}
-
-// Informacion de Codigo de barras personalizado para codigos de barra EAN13
-const PRODUCT_DATABASE: ProductDatabase = {
-  '104590705201': { name: 'Oreo', category: 'otros', expirationDays: 7 },
-  '129304301933': { name: 'Leche', category: 'lácteos', expirationDays: 7},
-  '114678134562': { name: 'Pan Integral', category: 'granos', expirationDays: 5 },
-  '112185028403': { name: 'Manzanas', category: 'frutas', expirationDays: 14 },
-  '119583019484': { name: 'Pechuga de Pollo', category: 'carnes', expirationDays: 3 },
-  '129059284055': { name: 'Zanahorias', category: 'verduras', expirationDays: 10 },
-};
+import { productService } from '../../services/supabaseServices';
 
 export default function ScanProductScreen({ navigation }: any) {
   const [permission, requestPermission] = useCameraPermissions();
@@ -46,63 +25,71 @@ export default function ScanProductScreen({ navigation }: any) {
     }
   }, [permission]);
 
-  const handleBarCodeScanned = ({ data }: { data: string }) => {
+  const handleBarCodeScanned = async ({ data }: { data: string }) => {
     setScanned(true);
     setCameraActive(false);
+    
+    try {
+      // Buscar producto en Supabase
+      const productData = await productService.getProductByBarcode(data);
+      
+      if (productData) {
+        const expirationDate = new Date();
+        expirationDate.setDate(expirationDate.getDate() + productData.typical_expiration_days);
+        
+        const newProduct = {
+          id: productData.id, // Usar ID de Supabase
+          barcode: productData.barcode,
+          name: productData.name,
+          category: 'otros' as any,
+        };
 
-    // Usar solo los primeros 12 dígitos
-    const baseCode = data.substring(0, 12);
-
-    const productData = PRODUCT_DATABASE[baseCode];
-
-    if (productData) {
-      const expirationDate = new Date();
-      expirationDate.setDate(expirationDate.getDate() + productData.expirationDays);
-
-      const newProduct = {
-        id: Date.now().toString(),
-        barcode: data,
-        name: productData.name,
-        category: productData.category as any,
-      };
-
-      addProduct(newProduct, expirationDate,);
-
-      Alert.alert(
-        t('productAdded'),
-        `${productData.name} ${t('addedToPantry')}`,
-        [
-          {
-            text: t('continue'),
-            onPress: () => {
-              setScanned(false);
-              setCameraActive(true);
+        addProduct(newProduct, expirationDate);
+        
+        Alert.alert(
+          t('productAdded'),
+          `${productData.name} ${t('addedToPantry')}`,
+          [
+            {
+              text: t('continue'),
+              onPress: () => {
+                setScanned(false);
+                setCameraActive(true);
+              }
+            },
+            {
+              text: t('viewPantry'),
+              onPress: () => navigation.navigate('Tabs', { screen: 'Inventory' })
             }
-          },
-          {
-            text: t('viewPantry'),
-            onPress: () => navigation.navigate('Tabs', { screen: 'Inventory' })
-          }
-        ]
-      );
-    } else {
-      Alert.alert(
-        t('productNotFound'),
-        t('productNotFoundMessage'),
-        [
-          {
-            text: t('tryAgain'),
-            onPress: () => {
-              setScanned(false);
-              setCameraActive(true);
+          ]
+        );
+      } else {
+        Alert.alert(
+          t('productNotFound'),
+          t('productNotFoundMessage'),
+          [
+            {
+              text: t('tryAgain'),
+              onPress: () => {
+                setScanned(false);
+                setCameraActive(true);
+              }
+            },
+            {
+              text: t('addManually'),
+              onPress: () => navigation.navigate('ManualAdd')
             }
-          },
-          {
-            text: t('addManually'),
-            onPress: () => navigation.navigate('ManualAdd')
-          }
-        ]
+          ]
+        );
+      }
+    } catch (error) {
+      console.error('Error escaneando producto:', error);
+      Alert.alert(
+        "Error",
+        "Error al buscar el producto. Intenta de nuevo."
       );
+      setScanned(false);
+      setCameraActive(true);
     }
   };
 

@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { Product, InventoryItemSerializable } from "../infoutils/theme/types/Products";
+import { Product, InventoryItemSerializable } from "../infoutils/types/Products";
 
 interface InventoryState {
   items: InventoryItemSerializable[];
@@ -56,7 +56,7 @@ const inventorySlice = createSlice({
     updateExpiringStatus: (state) => {
       const today = new Date();
       const tomorrow = new Date();
-      tomorrow.setDate(today.getDate() + 2);
+      tomorrow.setDate(today.getDate() + 4);
       
       const todayISO = today.toISOString();
       const tomorrowISO = tomorrow.toISOString();

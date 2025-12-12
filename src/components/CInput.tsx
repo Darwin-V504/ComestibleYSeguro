@@ -46,10 +46,11 @@ export default function CInput({
     return (
         <View style={styles.wrapper}>
 
-            {/* INPUT */}
+            {/* Input */}
             <View style={[styles.inputContainer, error && styles.inputError]}>
 
-                {/* ICONO IZQUIERDO */}
+                {/* Icono Izquierdo */}
+                {/* Para poner cualquier icon */}
                 {icon ? (
                     <View style={{ marginRight: 10 }}>
                         {icon}

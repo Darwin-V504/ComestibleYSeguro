@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, Alert } from "react-native";
 import CInput from "../components/CInput";
 import CButton from "../components/CButton";
 import { useState } from "react";
@@ -7,6 +7,8 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { useLanguage } from "../contexts/LanguageContext";
 import { useTheme } from "../contexts/ThemeContext";
 import { getThemeColors } from "../infoutils/theme";
+import { useClient } from "../hooksredux/useClient";
+import { useAuth } from "../contexts/AuthContexts";
 
 export default function RegisterScreen({ navigation }: any) {
     const [fullName, setFullName] = useState('');
@@ -14,21 +16,65 @@ export default function RegisterScreen({ navigation }: any) {
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const { t } = useLanguage();
-
     const [phone, setPhone] = useState('');
     const [birthDate, setBirthDate] = useState('');
     const [showDatePicker, setShowDatePicker] = useState(false);
     const [selectedDate, setSelectedDate] = useState(new Date());
-
     const { theme } = useTheme();
     const colors = getThemeColors(theme);
     const styles = getStyles(colors);
 
-    const handleRegisterToTabs = () => {
+    // hooks
+    const { saveClientProfile } = useClient();
+    const { signUp } = useAuth(); // USAR signUp actualizado
+
+    const handleRegisterToTabs = async () => {
         try {
-            navigation.navigate('Index', { email });
+            // validar campos
+            if (!fullName.trim() || !email.trim() || !password.trim()) {
+                Alert.alert("Error", "Por favor completa todos los campos obligatorios");
+                return;
+            }
+
+            if (password !== confirmPassword) {
+                Alert.alert("Error", "Las contraseñas no coinciden");
+                return;
+            }
+
+            const profileData = {
+                fullName,
+                phone,
+                birthDate
+            };
+
+            const authSuccess = await signUp(email, password, profileData); // Pasar datos del perfil
+
+            if (authSuccess) {
+                // Guardar también en Redux local para compatibilidad
+                saveClientProfile({
+                    fullName,
+                    email,
+                    phone,
+                    birthDate
+                });
+                
+                Alert.alert(
+                    "Registro Exitoso",
+                    "Tu cuenta ha sido creada. Ahora inicia sesión con tus credenciales.",
+                    [
+                        {
+                            text: "Iniciar Sesión",
+                            onPress: () => navigation.navigate('Login')
+                        }
+                    ]
+                );
+            } else {
+                Alert.alert("Error", "No se pudo completar el registro");
+            }
+            
         } catch (error) {
             console.log(error);
+            Alert.alert("Error", "Ocurrió un error durante el registro");
         }
     };
 
@@ -38,7 +84,6 @@ export default function RegisterScreen({ navigation }: any) {
 
     const onDateChange = (event: any, date?: Date) => {
         setShowDatePicker(false);
-
         if (date) {
             setSelectedDate(date);
             const formatted = date.toISOString().split("T")[0];
@@ -50,7 +95,6 @@ export default function RegisterScreen({ navigation }: any) {
         <View style={styles.container}>
             <View style={styles.card}>
                 <Text style={styles.titletxt}>Crea tu usuario</Text>
-
                 <CInput
                     value={fullName}
                     type='text'
@@ -58,7 +102,6 @@ export default function RegisterScreen({ navigation }: any) {
                     onChangeText={setFullName}
                     icon={<Ionicons name="person-circle-outline" size={22} color={colors.text} />}
                 />
-
                 <CInput
                     value={email}
                     type='email'
@@ -66,7 +109,6 @@ export default function RegisterScreen({ navigation }: any) {
                     onChangeText={setEmail}
                     icon={<Ionicons name="mail-outline" size={22} color={colors.text} />}
                 />
-
                 <CInput
                     value={password}
                     type='password'
@@ -74,7 +116,6 @@ export default function RegisterScreen({ navigation }: any) {
                     onChangeText={setPassword}
                     icon={<Ionicons name="lock-closed-outline" size={22} color={colors.text} />}
                 />
-
                 <CInput
                     value={confirmPassword}
                     type='password'
@@ -82,7 +123,6 @@ export default function RegisterScreen({ navigation }: any) {
                     onChangeText={setConfirmPassword}
                     icon={<Ionicons name="lock-closed-outline" size={22} color={colors.text} />}
                 />
-
                 <CInput
                     value={phone}
                     type='number'
@@ -90,8 +130,7 @@ export default function RegisterScreen({ navigation }: any) {
                     onChangeText={setPhone}
                     icon={<Ionicons name="call-outline" size={22} color={colors.text} />}
                 />
-
-                {/* FECHA DE NACIMIENTO */}
+                {/* Fecha de nacimiento */}
                 <TouchableOpacity onPress={openDatePicker}>
                     <CInput
                         value={birthDate}
@@ -101,17 +140,19 @@ export default function RegisterScreen({ navigation }: any) {
                         icon={<Ionicons name="calendar-outline" size={22} color={colors.text} />}
                     />
                 </TouchableOpacity>
-
                 {showDatePicker && (
                     <DateTimePicker
                         mode="date"
                         value={selectedDate}
-                        maximumDate={new Date()} // para que no elijan futuro
+                        maximumDate={new Date()}
                         onChange={onDateChange}
                     />
                 )}
-
-                <CButton title={'Registrarme'} onPress={handleRegisterToTabs} />
+                <CButton
+                    title={'Registrarme'}
+                    onPress={handleRegisterToTabs}
+                    disabled={!fullName || !email || !password || !confirmPassword}
+                />
             </View>
         </View>
     );

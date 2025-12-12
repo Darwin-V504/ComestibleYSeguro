@@ -1,5 +1,5 @@
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
-import { InventoryItem } from "../infoutils/theme/types/Products";
+import { InventoryItem } from "../infoutils/types/Products";
 import { Ionicons } from "@expo/vector-icons";
 import CButton from "./CButton";
 import { useTheme } from "../contexts/ThemeContext";
@@ -35,7 +35,7 @@ export default function ProductCard({ item, onRemove, onUpdateQuantity }: Props)
         <Text style={styles.category}>
           {t(item.product.category)}
         </Text>
-        <Text style={[styles.expiry, daysUntilExpiry <= 2 && styles.expiringText]}>
+        <Text style={[styles.expiry, daysUntilExpiry <= 4 && styles.expiringText]}>
           {daysUntilExpiry <= 0 
             ? t('expired') 
             : `${t('expiresIn')} ${daysUntilExpiry} ${t('days')}`

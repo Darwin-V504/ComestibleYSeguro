@@ -1,4 +1,4 @@
-// infoutils/translations.js
+
 export const translations = {
   en: {
     // Auth
@@ -56,6 +56,7 @@ export const translations = {
     confirmDelete: 'Are you sure you want to delete this product?',
     cancel: 'Cancel',
     delete: 'Delete',
+    contains: 'Contains',
     
     // Categories
     lacteos: 'Dairy',
@@ -91,8 +92,21 @@ export const translations = {
     keepAdding: 'Keep Adding',
     product: 'product',
     addedToPantry: 'has been added to your pantry',
+      //DetailScreen
+    matchesYourIngredients: 'Matches your ingredients',
+    time: 'Time',
+    difficulty: 'Difficulty',
+    category: 'Category',
+    general: 'General',
+    longRecipeNote: 'This is a long recipe. Make sure you have enough time!',
+    saveRecipe: 'Save Recipe',
+    noVideo: 'No Video',
+    noVideoAvailable: 'No video tutorial available for this recipe',
+    watchOnYoutube: 'Watch on YouTube',
+    contains: 'Contains',
     
     // Recipes
+    recipe: 'Recipe',
     suggestedRecipes: 'Suggested Recipes',
     basedOnExpiring: 'Based on your expiring products',
     noRecipes: 'No suggested recipes',
@@ -103,13 +117,60 @@ export const translations = {
     easy: 'Easy',
     medium: 'Medium',
     hard: 'Hard',
-    enjoyMeal: 'Enjoy your meal!',
-    preparing: 'Preparing',
     noProductsForRecipes: 'No products expiring soon',
     addProductsForRecipes: 'Add products to your pantry to get recipe suggestions',
     noRecipesAvailable: 'No suggested recipes available',
     recipeTime: 'Time',
     recipeDifficulty: 'Difficulty',
+    matches: 'Matches',
+    ofYourIngredients: 'of your ingredients',
+    thisRecipeUses: 'This recipe uses',
+    mainIngredients: 'Main ingredients',
+    more: 'more',
+    viewFullRecipe: 'View full recipe',
+    yourIngredients: 'Your ingredients',
+    showingLocalRecipes: 'Showing local recipe suggestions',
+    found: 'found',
+    instructions: 'Instructions',
+    tags: 'Tags',
+    recipeSaved: 'Recipe saved',
+    recipeSavedMessage: 'You have saved this recipe to your favorites',
+    save: 'Save',
+    noRecipesForIngredients: 'No recipes found for your ingredients',
+
+     // Categories
+    chicken: 'Chicken',
+    fruits: 'Fruits',
+    beverages: 'Beverages',
+    pasta: 'Pasta',
+    soup: 'Soup',
+     apples: 'Apples',
+    milk: 'Milk',
+    yogurt: 'Yogurt',
+    honey: 'Honey',
+    cinnamon: 'Cinnamon',
+    bread: 'Bread',
+    carrots: 'Carrots',
+    lettuce: 'Lettuce',
+    tomato: 'Tomato',
+    mayonnaise: 'Mayonnaise',
+    banana: 'Banana',
+    spinach: 'Spinach',
+    cream: 'Cream',
+    parmesan: 'Parmesan',
+    broccoli: 'Broccoli',
+    garlic: 'Garlic',
+    butter: 'Butter',
+    potato: 'Potato',
+    onion: 'Onion',
+    chickenstock: 'Chicken stock',
+    celery: 'Celery',
+    noodles: 'Noodles',
+    parsley: 'Parsley',
+    eggs: 'Eggs',
+    cheese: 'Cheese',
+    rice: 'Rice',
+    
     
     // Profile
     connected: 'Connected',
@@ -129,6 +190,32 @@ export const translations = {
     logout: 'Logout',
     reducingWaste: 'Reducing food waste, one product at a time',
     version: 'Version Beta',
+
+    // Profile Photo - New translations
+    changeProfilePhoto: 'Change Profile Photo',
+    selectOption: 'Select an option',
+    takePhoto: 'Take Photo',
+    chooseFromGallery: 'Choose from Gallery',
+    cancel: 'Cancel',
+    photoUpdateSuccess: 'Profile photo updated successfully!',
+    photoUpdateError: 'Could not update profile photo',
+    cameraPermissionDenied: 'Camera permission denied',
+    galleryPermissionDenied: 'Gallery permission denied',
+    needCameraAccess: 'You need to allow camera access to take a photo',
+    needGalleryAccess: 'You need to allow gallery access to choose a photo',
+    cameraError: 'Error taking photo',
+    galleryError: 'Error selecting photo from gallery',
+    
+    // Permission messages
+    permissionRequired: 'Permission Required',
+    allowAccessTo: 'Allow access to',
+    toContinue: 'to continue',
+    openSettings: 'Open Settings',
+    
+    // Photo options
+    photoOptions: 'Photo Options',
+    selectPhotoSource: 'Select photo source',
+
     
     // Language
     language: 'Language',
@@ -245,8 +332,24 @@ export const translations = {
     keepAdding: 'Seguir Agregando',
     product: 'producto',
     addedToPantry: 'ha sido agregado a tu despensa',
+
+    //DetailScreen
+ 
+  matchesYourIngredients: 'Coincide con tus ingredientes',
+  time: 'Tiempo',
+  difficulty: 'Dificultad',
+  category: 'Categoría',
+  general: 'General',
+  longRecipeNote: 'Esta es una receta larga. ¡Asegúrate de tener suficiente tiempo!',
+  saveRecipe: 'Guardar Receta',
+  noVideo: 'Sin Video',
+  noVideoAvailable: 'No hay video tutorial disponible para esta receta',
+  watchOnYoutube: 'Ver en YouTube',
+  contains: 'Contiene',
+
     
     // Recipes
+    recipe: 'Receta',
     suggestedRecipes: 'Recetas Sugeridas',
     basedOnExpiring: 'Basado en tus productos próximos a expirar',
     noRecipes: 'No hay recetas sugeridas',
@@ -257,13 +360,61 @@ export const translations = {
     easy: 'Fácil',
     medium: 'Media',
     hard: 'Difícil',
-    enjoyMeal: '¡Buen provecho!',
-    preparing: 'Preparando',
+    matches: 'Coincide con',
+    ofYourIngredients: 'de tus ingredientes',
+    thisRecipeUses: 'Esta receta usa',
+    mainIngredients: 'Ingredientes principales',
+    more: 'más',
+    viewFullRecipe: 'Ver receta completa',
+    yourIngredients: 'Tus ingredientes',
+    found: 'encontrada(s)',
+    instructions: 'Instrucciones',
+    tags: 'Etiquetas',
+    recipeSaved: 'Receta guardada',
+    recipeSavedMessage: 'Has guardado esta receta en tus favoritos',
+    save: 'Guardar',
+    noRecipesForIngredients: 'No se encontraron recetas para tus ingredientes',
+    
+    // Categorías api
+    chicken: 'Pollo',
+    fruits: 'Frutas',
+    beverages: 'Bebidas',
+    pasta: 'Pasta',
+    soup: 'Sopa',
+      // Ingredientes comunes
+    apples: 'Manzanas',
+    milk: 'Leche',
+    yogurt: 'Yogur',
+    honey: 'Miel',
+    cinnamon: 'Canela',
+    bread: 'Pan',
+    carrots: 'Zanahorias',
+    lettuce: 'Lechuga',
+    tomato: 'Tomate',
+    mayonnaise: 'Mayonesa',
+    banana: 'Plátano',
+    spinach: 'Espinaca',
+    cream: 'Crema',
+    parmesan: 'Parmesano',
+    broccoli: 'Brócoli',
+    garlic: 'Ajo',
+    butter: 'Mantequilla',
+    potato: 'Papa',
+    onion: 'Cebolla',
+    chickenstock: 'Caldo de pollo',
+    celery: 'Apio',
+    noodles: 'Fideos',
+    parsley: 'Perejil',
+    eggs: 'Huevos',
+    cheese: 'Queso',
+    rice: 'Arroz',
+  
     noProductsForRecipes: 'No hay productos próximos a expirar',
     addProductsForRecipes: 'Agrega productos a tu despensa para obtener sugerencias de recetas',
     noRecipesAvailable: 'No hay recetas sugeridas disponibles',
     recipeTime: 'Tiempo',
     recipeDifficulty: 'Dificultad',
+   
     
     // Profile
     connected: 'Conectado',
@@ -283,6 +434,31 @@ export const translations = {
     logout: 'Cerrar Sesión',
     reducingWaste: 'Reduciendo el desperdicio de alimentos, un producto a la vez',
     version: 'Version Beta',
+
+    // Profile Photo - New translations
+    changeProfilePhoto: 'Cambiar Foto de Perfil',
+    selectOption: 'Selecciona una opción',
+    takePhoto: 'Tomar Foto',
+    chooseFromGallery: 'Elegir de Galería',
+    cancel: 'Cancelar',
+    photoUpdateSuccess: '¡Foto de perfil actualizada correctamente!',
+    photoUpdateError: 'No se pudo actualizar la foto de perfil',
+    cameraPermissionDenied: 'Permiso de cámara denegado',
+    galleryPermissionDenied: 'Permiso de galería denegado',
+    needCameraAccess: 'Necesitas permitir el acceso a la cámara para tomar una foto',
+    needGalleryAccess: 'Necesitas permitir el acceso a la galería para elegir una foto',
+    cameraError: 'Error al tomar la foto',
+    galleryError: 'Error al seleccionar foto de la galería',
+    
+    // Permission messages
+    permissionRequired: 'Permiso Requerido',
+    allowAccessTo: 'Permitir acceso a',
+    toContinue: 'para continuar',
+    openSettings: 'Abrir Configuración',
+    
+    // Photo options
+    photoOptions: 'Opciones de Foto',
+    selectPhotoSource: 'Selecciona fuente de foto',
     
     // Language
     language: 'Idioma',

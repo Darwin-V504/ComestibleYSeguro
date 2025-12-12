@@ -3,7 +3,7 @@ import { useState } from 'react';
 import CInput from '../../components/CInput';
 import CButton from '../../components/CButton';
 import { useInventory } from '../../hooksredux/useInventory';
-import { Product, ProductCategory } from '../../infoutils/theme/types/Products';
+import { Product, ProductCategory } from '../../infoutils/types/Products';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { getThemeColors } from '../../infoutils/theme';
@@ -24,76 +24,67 @@ export default function ManualAddScreen({ navigation }: any) {
   const [expirationDays, setExpirationDays] = useState('');
   const [quantity, setQuantity] = useState('');
 
-  const handleAddProduct = () => {
-    if (!productName.trim()) {
-      Alert.alert(
-        t('error'),
-        t('pleaseEnterName')
-      );
-      return;
-    }
-
-    if (!expirationDays || parseInt(expirationDays) <= 0) {
-      Alert.alert(
-        t('error'),
-        t('invalidDays')
-      );
-      return;
-    } else if (!expirationDays || parseInt(expirationDays) >= 365) {
-      Alert.alert(
-        t('error'),
-        t('invalidDays')
-      );
-      return;
-    }
-
-    if (!quantity || parseInt(quantity) <= 0) {
-      Alert.alert(
-        t('error'),
-        t('invalidQuantity')
-      );
-      return;
-    } else if (!quantity || parseInt(quantity) >= 80) {
-      Alert.alert(
-        t('error'),
-        t('invalidQuantity')
-      );
-      return;
-    }
-
-    const newProduct: Product = {
-      id: Date.now().toString(),
-      barcode: `manual_${Date.now()}`,
-      name: productName.trim(),
-      category: selectedCategory,
-    };
-
-    const expirationDate = new Date();
-    expirationDate.setDate(expirationDate.getDate() + parseInt(expirationDays));
-
-    addProduct(newProduct, expirationDate, parseInt(quantity));
-
-    const unitText = parseInt(quantity) > 1 ? t('product') : t('product');
-
+// En la función handleAddProduct de ManualAddServices.tsx:
+const handleAddProduct = () => {
+  if (!productName.trim()) {
     Alert.alert(
-      t('productAdded'),
-      `${productName} (${quantity} ${unitText}) ${t('addedToPantry')}`,
-      [
-        {
-          text: t('keepAdding'),
-          onPress: () => {
-            setProductName('');
-            setExpirationDays('7');
-            setQuantity('1');
-          }
-        },
-        {
-          text: t('viewPantry'),
-          onPress: () => navigation.navigate('Tabs', { screen: 'Inventory' })
-        }
-      ]
+      t('error'),
+      t('pleaseEnterName')
     );
+    return;
+  }
+
+  if (!expirationDays || parseInt(expirationDays) <= 0) {
+    Alert.alert(
+      t('error'),
+      t('invalidDays')
+    );
+    return;
+  }
+
+  if (!quantity || parseInt(quantity) <= 0) {
+    Alert.alert(
+      t('error'),
+      t('invalidQuantity')
+    );
+    return;
+  }
+
+  const newProduct: Product = {
+    id: `manual_${Date.now()}`, // ID que empiece con "manual_"
+    barcode: `manual_${Date.now()}`, // Barcode que empiece con "manual_"
+    name: productName.trim(),
+    category: selectedCategory,
   };
+
+  const expirationDate = new Date();
+  expirationDate.setDate(expirationDate.getDate() + parseInt(expirationDays));
+
+  addProduct(newProduct, expirationDate, parseInt(quantity));
+
+  const unitText = parseInt(quantity) > 1 ? t('product') : t('product');
+
+  Alert.alert(
+    t('productAdded'),
+    `${productName} (${quantity} ${unitText}) ${t('addedToPantry')}`,
+    [
+      {
+        text: t('keepAdding'),
+        onPress: () => {
+          setProductName('');
+          setExpirationDays('7');
+          setQuantity('1');
+        }
+      },
+      {
+        text: t('viewPantry'),
+        onPress: () => navigation.navigate('Tabs', { screen: 'Inventory' })
+      }
+    ]
+  );
+};
+
+
 
   const isFormValid = productName.trim() !== '' && expirationDays !== '' && quantity !== '';
 
